@@ -1,0 +1,166 @@
+<div id="tourinsoft-widget" style="width:100%;margin:auto;padding:20px;box-sizing:border-box;background-color:transparent;font-family:'Century Gothic', Arial, sans-serif;">
+  <style>
+    #tourinsoft-widget .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: flex-start;
+    }
+    #tourinsoft-widget .list-item {
+      background-color: #fff;
+      flex: 1 1 290px;
+      border: 1px solid #ddd;
+      border-radius: 15px;
+      overflow: visible;
+      transition: box-shadow 0.2s ease-in-out;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-bottom: 70px;
+    }
+    #tourinsoft-widget .list-item:hover {
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    #tourinsoft-widget img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+    }
+    #tourinsoft-widget .content {
+      padding: 15px;
+    }
+    #tourinsoft-widget h3 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      color: hsl(33.6deg 12.03% 46.52%);
+      font-family: 'Century Gothic', Arial, sans-serif;
+      font-weight: bold;
+    }
+    #tourinsoft-widget .info {
+      margin: 10px 0;
+      font-size: 11px;
+      color: #777;
+    }
+    #tourinsoft-widget p {
+      margin: 0 0 10px;
+      color: #555;
+      font-size: 12px;
+    }
+    #tourinsoft-widget a.button {
+      display: block;
+      padding: 10px 20px;
+      background-color: hsl(33.6deg 12.03% 46.52%);
+      color: #fff;
+      border-radius: 5px;
+      text-align: center;
+      margin-top: auto;
+      margin-bottom: 15px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+      width: auto;
+      align-self: center;
+      font-family: 'Century Gothic', Arial, sans-serif;
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      font-weight: bold;
+    }
+    #tourinsoft-widget a.button:hover {
+      background-color: hsl(33.6deg 12.03% 36%);
+    }
+  </style>
+
+  <div class="container" id="tourinsoft-container"></div>
+
+  <script>
+    (async function() {
+      const apiUrl = "https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/b8d0bff0-353c-4269-ad25-3af3b98a7acb?format=json";
+      let data = [];
+      let currentIndex = 0;
+      const batchSize = 20;
+      const container = document.getElementById("tourinsoft-container");
+
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP : ${response.status}`);
+        }
+
+        const jsonData = await response.json();
+        if (!Array.isArray(jsonData.value)) {
+          throw new Error("Les données reçues ne sont pas valides.");
+        }
+
+        data = jsonData.value;
+        loadMoreItems();
+      } catch (error) {
+        console.error("Erreur lors du chargement des données Tourinsoft :", error);
+        container.innerHTML = "<p>Les données sont temporairement indisponibles.</p>";
+      }
+
+      function loadMoreItems() {
+        const nextItems = data.slice(currentIndex, currentIndex + batchSize);
+        nextItems.forEach(item => {
+          const listItem = document.createElement("div");
+          listItem.className = "list-item";
+
+          // Photo
+          const photoUrl = item?.Photoss?.[0]?.Photo?.Url;
+          const photoHtml = photoUrl ? `<img src="${photoUrl}" alt="Photo de ${item.SyndicObjectName || 'objet touristique'}">` : "";
+
+          // Links
+          const officialSite = item?.MoyenDeComs?.find(moyen => moyen.TypedaccesTelecom?.ThesCode === "C5")?.CoordonneesTelecom;
+          const officialSiteLink = officialSite ? `<a href="${officialSite}" target="_blank" class="button">${new URL(officialSite).hostname.replace('www.', '')}</a>` : '';
+          const moreInfoLink = item?.Url ? `<a href="${item.Url}" target="_blank" class="button">Plus d'informations</a>` : officialSiteLink;
+
+          // Address
+          const address = item?.AdresseCompletes?.[0]?.Adresse1;
+          const postalCode = item?.AdresseCompletes?.[0]?.CodePostal;
+          const commune = item?.AdresseCompletes?.[0]?.Commune;
+          const addressHtml = address ? `<div class="info">${address}, ${postalCode || ''} ${commune || ''}</div>` : "";
+
+          // Telephone
+          const telephone = item?.MoyenDeComs?.find(moyen => moyen.TypedaccesTelecom?.ThesCode === "C1")?.CoordonneesTelecom;
+          const telephoneHtml = telephone ? `<div class="info"><span style="font-size: 1.2em; margin-right: 5px; color: #000;">&#9743;</span> ${telephone}</div>` : "";
+
+          // Mobile Telephone
+          const mobileTelephone = item?.MoyenDeComs?.find(moyen => moyen.TypedaccesTelecom?.ThesCode === "C6")?.CoordonneesTelecom;
+          const mobileTelephoneHtml = mobileTelephone ? `<span class="info"><span style='font-size: 1.2em; margin-right: 5px; color: #000;'>&#128241;</span> ${mobileTelephone}</span>` : "";
+
+          // Description
+          let description = item?.DescriptionCommerciale || item?.DescriptifPersonnalise || '';
+          if (description.length > 260) {
+            description = description.substring(0, description.lastIndexOf(' ', 260)) + '...';
+          }
+
+          // Assembling HTML
+          listItem.innerHTML = `
+            ${photoHtml}
+            <div class="content">
+              <h3>${item.SyndicObjectName || "Nom non disponible"}</h3>
+              ${addressHtml}
+              ${description ? `<p>${description}</p>` : ''}
+              ${telephoneHtml}${mobileTelephoneHtml}
+              ${moreInfoLink}
+            </div>
+          `;
+          container.appendChild(listItem);
+        });
+
+        currentIndex += batchSize;
+      }
+
+      window.addEventListener("scroll", () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100) {
+          loadMoreItems();
+        }
+      });
+    })();
+  </script>
+</div>
