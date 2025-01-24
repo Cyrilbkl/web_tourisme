@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Tourinsoft</title>
+  <link rel="stylesheet" href="https://unpkg.com/tailwindcss@3.4.1/src/css/preflight.css">
+  <style>
+    :root {
+      --primary-color: hsl(33.6deg 12.03% 46.52%);
+    }
+
+    body {
+      font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+    }
+
+    .widget-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .fixed-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 50;
+    }
+
+    .filter-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .filter-select {
+      padding: 0.5rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      outline: none;
+      transition: all 0.2s;
+      min-width: 200px;
+      background-color: white;
+      color: var(--primary-color);
+    }
+
+    .filter-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(139, 134, 127, 0.2);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding-top: 5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: box-shadow 0.3s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .card-image {
+      aspect-ratio: 16/9;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.75rem;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .info-row a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .info-row a:hover {
+      color: var(--primary-color);
+    }
+
+    .description {
+      color: #4b5563;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+      line-height: 1.5;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      background: #f5f3f1;
+      color: var(--primary-color);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+
+    .link-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      margin-top: auto;
+      width: fit-content;
+    }
+
+    .link-button:hover {
+      background: hsl(33.6deg 12.03% 36%);
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid #e5e7eb;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="tourinsoft-widget" class="widget-container">
+    <div class="fixed-header">
+      <div class="filter-container">
+        <select id="sort-filter" class="filter-select">
+          <option value="distance">Trier par distance</option>
+          <option value="commune">Trier par commune</option>
+          <option value="name">Trier par nom</option>
+          <option value="random">Tri aléatoire</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="content" class="card-grid">
+      <div class="loading">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (async function() {
+      // Configuration du préfiltre (à définir selon vos besoins)
+      const PREFILTER_CATEGORY = "Promenade"; // Remplacez par la catégorie souhaitée
+
+      const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/e2d1b192-087a-4a9e-b6c9-ae265e537260?format=json';
+      const contentContainer = document.getElementById('content');
+      const sortFilter = document.getElementById('sort-filter');
+      let allData = [];
+      let userLocation = null;
+
+      const icons = {
+        location: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+        phone: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
+        mobile: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>',
+        tag: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>',
+        link: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'
+      };
+
+      function getDistance(lat1, lon1, lat2, lon2) {
+        if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                 Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                 Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+      }
+
+      function createCard(item) {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        if (item.Photoss?.[0]?.Photo?.Url) {
+          const img = document.createElement('img');
+          img.src = item.Photoss[0].Photo.Url;
+          img.alt = item.SyndicObjectName;
+          img.className = 'card-image';
+          card.appendChild(img);
+        }
+
+        const content = document.createElement('div');
+        content.className = 'card-content';
+
+        const title = document.createElement('h3');
+        title.className = 'card-title';
+        title.textContent = item.SyndicObjectName;
+        content.appendChild(title);
+
+        if (item.AdresseCompletes?.[0]) {
+          const location = document.createElement('div');
+          location.className = 'info-row';
+          const mapUrl = item.GmapLatitude && item.GmapLongitude 
+            ? `https://www.google.com/maps?q=${item.GmapLatitude},${item.GmapLongitude}`
+            : null;
+          
+          location.innerHTML = mapUrl
+            ? `${icons.location}<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">
+                <span>${item.AdresseCompletes[0].Commune || ''} ${item.AdresseCompletes[0].CodePostal || ''}</span>
+              </a>`
+            : `${icons.location}<span>${item.AdresseCompletes[0].Commune || ''} ${item.AdresseCompletes[0].CodePostal || ''}</span>`;
+          
+          content.appendChild(location);
+        }
+
+        if (item.DescriptifPersonnalise) {
+          const description = document.createElement('p');
+          description.className = 'description';
+          description.textContent = item.DescriptifPersonnalise.length > 150
+            ? item.DescriptifPersonnalise.substring(0, 150) + '...'
+            : item.DescriptifPersonnalise;
+          content.appendChild(description);
+        }
+
+        item.MoyenDeComs?.forEach(moyen => {
+          if (['C1', 'C6'].includes(moyen.TypedaccesTelecom?.ThesCode)) {
+            const contact = document.createElement('div');
+            contact.className = 'info-row';
+            contact.innerHTML = `
+              ${moyen.TypedaccesTelecom.ThesCode === 'C1' ? icons.phone : icons.mobile}
+              <span>${moyen.CoordonneesTelecom}</span>
+            `;
+            content.appendChild(contact);
+          }
+        });
+
+        if (item.Classification2s?.length) {
+          const tags = document.createElement('div');
+          tags.className = 'tags-container';
+          item.Classification2s.forEach(classification => {
+            if (classification.Categoriedeprestations?.ThesLibelle) {
+              const tag = document.createElement('span');
+              tag.className = 'tag';
+              tag.innerHTML = `${icons.tag} ${classification.Categoriedeprestations.ThesLibelle}`;
+              tags.appendChild(tag);
+            }
+          });
+          content.appendChild(tags);
+        }
+
+        const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
+        if (url) {
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'link-button';
+          link.innerHTML = `
+            <span>Plus d'informations</span>
+            ${icons.link}
+          `;
+          content.appendChild(link);
+        }
+
+        card.appendChild(content);
+        return card;
+      }
+
+      function sortItems(items, sortType) {
+        switch (sortType) {
+          case 'distance':
+            return items.sort((a, b) => {
+              const distA = getDistance(userLocation?.latitude, userLocation?.longitude, a.GmapLatitude, a.GmapLongitude);
+              const distB = getDistance(userLocation?.latitude, userLocation?.longitude, b.GmapLatitude, b.GmapLongitude);
+              return distA - distB;
+            });
+          case 'commune':
+            return items.sort((a, b) => {
+              const communeA = a.AdresseCompletes?.[0]?.Commune || '';
+              const communeB = b.AdresseCompletes?.[0]?.Commune || '';
+              return communeA.localeCompare(communeB);
+            });
+          case 'name':
+            return items.sort((a, b) => a.SyndicObjectName.localeCompare(b.SyndicObjectName));
+          case 'random':
+            return items.sort(() => Math.random() - 0.5);
+          default:
+            return items;
+        }
+      }
+
+      function filterAndDisplayItems() {
+        const sortType = sortFilter.value;
+        
+        // Applique le préfiltre sur la catégorie
+        let filteredItems = allData.filter(item =>
+          item.Classification2s?.some(
+            classification => 
+              classification.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY
+          )
+        );
+
+        filteredItems = sortItems(filteredItems, sortType);
+        
+        contentContainer.innerHTML = '';
+        filteredItems.forEach(item => {
+          contentContainer.appendChild(createCard(item));
+        });
+      }
+
+      function getUserLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            position => {
+              userLocation = position.coords;
+              if (sortFilter.value === 'distance') {
+                filterAndDisplayItems();
+              }
+            },
+            error => {
+              console.error('Erreur de géolocalisation:', error);
+              sortFilter.querySelector('option[value="distance"]').disabled = true;
+            }
+          );
+        } else {
+          sortFilter.querySelector('option[value="distance"]').disabled = true;
+        }
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        allData = data.value;
+        
+        getUserLocation();
+        sortFilter.addEventListener('change', filterAndDisplayItems);
+        filterAndDisplayItems();
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+        contentContainer.innerHTML = '<p>Les données sont temporairement indisponibles.</p>';
+      }
+    })();
+  </script>
+</body>
+</html>
