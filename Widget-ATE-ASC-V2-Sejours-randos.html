@@ -71,6 +71,7 @@
       height: 100%;
       display: flex;
       flex-direction: column;
+      cursor: pointer;
     }
 
     .card:hover {
@@ -144,6 +145,12 @@
       font-size: 0.75rem;
     }
 
+    .card-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
     .link-button {
       display: inline-flex;
       align-items: center;
@@ -156,12 +163,33 @@
       font-size: 0.875rem;
       font-weight: 500;
       transition: background-color 0.2s;
-      margin-top: auto;
-      width: fit-content;
+      border: none;
+      cursor: pointer;
     }
 
     .link-button:hover {
       background: hsl(33.6deg 12.03% 36%);
+    }
+
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--primary-color);
+      border: 1px solid currentColor;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .secondary-button:hover {
+      background: var(--primary-color);
+      color: white;
     }
 
     .loading {
@@ -185,6 +213,154 @@
         transform: rotate(360deg);
       }
     }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 0.75rem;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #4b5563;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s;
+      z-index: 1;
+    }
+
+    .modal-close:hover {
+      background-color: #f3f4f6;
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .modal-description {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.75rem;
+    }
+
+    .price-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .price-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+      padding: 0.5rem;
+      background: #f9fafb;
+      border-radius: 0.5rem;
+    }
+
+    .price-type {
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .price-label {
+      color: #4b5563;
+    }
+
+    .price-value {
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
+    .card-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .card:hover .card-overlay {
+      opacity: 1;
+    }
+
+    .card-overlay-text {
+      color: white;
+      font-weight: 500;
+      text-align: center;
+      padding: 1rem;
+    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -192,8 +368,8 @@
     <div class="fixed-header">
       <div class="filter-container">
         <select id="sort-filter" class="filter-select">
-          <option value="distance">Trier par distance</option>
           <option value="commune">Trier par commune</option>
+          <option value="distance">Trier par distance</option>
           <option value="name">Trier par nom</option>
           <option value="random">Tri aléatoire</option>
         </select>
@@ -207,14 +383,26 @@
     </div>
   </div>
 
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Fermer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
   <script>
     (async function() {
-      // Configuration du préfiltre (à définir selon vos besoins)
-      const PREFILTER_CATEGORY = "Accompagnement"; // Remplacez par la catégorie souhaitée
-
+      const PREFILTER_CATEGORY = "Accompagnement";
       const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/e2d1b192-087a-4a9e-b6c9-ae265e537260?format=json';
       const contentContainer = document.getElementById('content');
       const sortFilter = document.getElementById('sort-filter');
+      const modal = document.getElementById('modal');
+      const modalContent = document.getElementById('modal-content');
       let allData = [];
       let userLocation = null;
 
@@ -223,7 +411,8 @@
         phone: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
         mobile: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>',
         tag: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>',
-        link: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>'
+        link: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
+        euro: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"></path><path d="M4 14h9"></path><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"></path></svg>'
       };
 
       function getDistance(lat1, lon1, lat2, lon2) {
@@ -236,6 +425,152 @@
                  Math.sin(dLon/2) * Math.sin(dLon/2);
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         return R * c;
+      }
+
+      function showDetails(item) {
+        const content = document.createElement('div');
+
+        if (item.Photoss?.[0]?.Photo?.Url) {
+          const img = document.createElement('img');
+          img.src = item.Photoss[0].Photo.Url;
+          img.alt = item.SyndicObjectName;
+          img.className = 'modal-image';
+          content.appendChild(img);
+        }
+
+        const body = document.createElement('div');
+        body.className = 'modal-body';
+
+        const title = document.createElement('h2');
+        title.className = 'modal-title';
+        title.textContent = item.SyndicObjectName;
+        body.appendChild(title);
+
+        if (item.DescriptionCommerciales?.[0]?.Descriptionactiviteequipement) {
+          const description = document.createElement('div');
+          description.className = 'modal-description';
+          description.textContent = item.DescriptionCommerciales[0].Descriptionactiviteequipement;
+          body.appendChild(description);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'modal-info';
+
+        if (item.AdresseCompletes?.[0]) {
+          const address = document.createElement('div');
+          address.className = 'info-row';
+          const mapUrl = item.GmapLatitude && item.GmapLongitude 
+            ? `https://www.google.com/maps?q=${item.GmapLatitude},${item.GmapLongitude}`
+            : null;
+          
+          address.innerHTML = mapUrl
+            ? `${icons.location}<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">
+                ${item.AdresseCompletes[0].Adresse1}<br>
+                ${item.AdresseCompletes[0].CodePostal} ${item.AdresseCompletes[0].Commune}
+              </a>`
+            : `${icons.location}
+                ${item.AdresseCompletes[0].Adresse1}<br>
+                ${item.AdresseCompletes[0].CodePostal} ${item.AdresseCompletes[0].Commune}`;
+          
+          info.appendChild(address);
+        }
+
+        item.MoyenDeComs?.forEach(moyen => {
+          if (['C1', 'C6'].includes(moyen.TypedaccesTelecom?.ThesCode)) {
+            const contact = document.createElement('div');
+            contact.className = 'info-row';
+            contact.innerHTML = `
+              ${moyen.TypedaccesTelecom.ThesCode === 'C1' ? icons.phone : icons.mobile}
+              <span>${moyen.CoordonneesTelecom}</span>
+            `;
+            info.appendChild(contact);
+          }
+        });
+
+        body.appendChild(info);
+
+        if (item.Classification2s?.length) {
+          const tags = document.createElement('div');
+          tags.className = 'tags-container';
+          const uniqueTags = new Set();
+          
+          item.Classification2s.forEach(classification => {
+            if (classification.Categoriedeprestations?.ThesLibelle) {
+              uniqueTags.add(classification.Categoriedeprestations.ThesLibelle);
+            }
+          });
+
+          uniqueTags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag';
+            tagElement.innerHTML = `${icons.tag} ${tag}`;
+            tags.appendChild(tagElement);
+          });
+
+          if (uniqueTags.size > 0) {
+            body.appendChild(tags);
+          }
+        }
+
+        if (item.Tarifss?.length > 0) {
+          const priceSection = document.createElement('div');
+          priceSection.className = 'modal-section';
+          
+          const priceTitle = document.createElement('h3');
+          priceTitle.className = 'modal-section-title';
+          priceTitle.innerHTML = `${icons.euro} Tarifs`;
+          priceSection.appendChild(priceTitle);
+
+          const priceList = document.createElement('div');
+          priceList.className = 'price-list';
+
+          item.Tarifss.forEach(tarif => {
+            if (tarif.Detailtarif) {
+              const priceItem = document.createElement('div');
+              priceItem.className = 'price-item';
+              
+              const type = document.createElement('span');
+              type.className = 'price-type';
+              type.textContent = "Intitulé tarifs";
+              
+              const label = document.createElement('span');
+              label.className = 'price-label';
+              label.textContent = tarif.Detailtarif;
+              
+              const value = document.createElement('span');
+              value.className = 'price-value';
+              value.textContent = tarif.Minimum ? `${tarif.Minimum}€` : 'Nous consulter';
+              
+              priceItem.appendChild(type);
+              priceItem.appendChild(label);
+              priceItem.appendChild(value);
+              priceList.appendChild(priceItem);
+            }
+          });
+
+          priceSection.appendChild(priceList);
+          body.appendChild(priceSection);
+        }
+
+        const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
+        if (url) {
+          const link = document.createElement('a');
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.className = 'link-button';
+          link.innerHTML = `
+            <span>Visiter le site web</span>
+            ${icons.link}
+          `;
+          body.appendChild(link);
+        }
+
+        content.appendChild(body);
+        modalContent.innerHTML = '';
+        modalContent.appendChild(content);
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
       }
 
       function createCard(item) {
@@ -298,32 +633,65 @@
         if (item.Classification2s?.length) {
           const tags = document.createElement('div');
           tags.className = 'tags-container';
+          const uniqueTags = new Set();
+          
           item.Classification2s.forEach(classification => {
             if (classification.Categoriedeprestations?.ThesLibelle) {
-              const tag = document.createElement('span');
-              tag.className = 'tag';
-              tag.innerHTML = `${icons.tag} ${classification.Categoriedeprestations.ThesLibelle}`;
-              tags.appendChild(tag);
+              uniqueTags.add(classification.Categoriedeprestations.ThesLibelle);
             }
           });
-          content.appendChild(tags);
+
+          uniqueTags.forEach(tag => {
+            const tagElement = document.createElement('span');
+            tagElement.className = 'tag';
+            tagElement.innerHTML = `${icons.tag} ${tag}`;
+            tags.appendChild(tagElement);
+          });
+
+          if (uniqueTags.size > 0) {
+            content.appendChild(tags);
+          }
         }
+
+        const buttonsContainer = document.createElement('div');
+        buttonsContainer.className = 'card-buttons';
+
+        const infoButton = document.createElement('button');
+        infoButton.className = 'secondary-button';
+        infoButton.innerHTML = `
+          <span>Plus d'infos</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+        `;
+        infoButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showDetails(item);
+        });
+        buttonsContainer.appendChild(infoButton);
 
         const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
         if (url) {
-          const link = document.createElement('a');
-          link.href = url;
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.className = 'link-button';
-          link.innerHTML = `
-            <span>Plus d'informations</span>
+          const websiteButton = document.createElement('a');
+          websiteButton.href = url;
+          websiteButton.target = '_blank';
+          websiteButton.rel = 'noopener noreferrer';
+          websiteButton.className = 'link-button';
+          websiteButton.innerHTML = `
+            <span>Voir le site</span>
             ${icons.link}
           `;
-          content.appendChild(link);
+          websiteButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+          });
+          buttonsContainer.appendChild(websiteButton);
         }
 
+        content.appendChild(buttonsContainer);
         card.appendChild(content);
+
         return card;
       }
 
@@ -353,7 +721,6 @@
       function filterAndDisplayItems() {
         const sortType = sortFilter.value;
         
-        // Applique le préfiltre sur la catégorie
         let filteredItems = allData.filter(item =>
           item.Classification2s?.some(
             classification => 
@@ -388,12 +755,32 @@
         }
       }
 
+      modal.querySelector('.modal-close').addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal .classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+
       try {
         const response = await fetch(API_URL);
         const data = await response.json();
         allData = data.value;
         
         getUserLocation();
+        sortFilter.value = 'commune'; // Définit le tri par commune par défaut
         sortFilter.addEventListener('change', filterAndDisplayItems);
         filterAndDisplayItems();
       } catch (error) {
