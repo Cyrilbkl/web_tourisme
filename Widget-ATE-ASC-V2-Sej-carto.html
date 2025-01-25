@@ -969,27 +969,28 @@ al<!DOCTYPE html>
       }
     }
 
-    function filterAndDisplayItems() {
-      const contentContainer = document.getElementById('content');
-      const sortFilter = document.getElementById('sort-filter');
-      const sortType = sortFilter.value;
-      
-      let filteredItems = allData.filter(item =>
-        item.Classification2s?.some(
-          classification => 
-            classification.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY
-        )
-      );
+function filterAndDisplayItems() {
+  const contentContainer = document.getElementById('content');
+  const sortFilter = document.getElementById('sort-filter');
+  const sortType = sortFilter.value;
+  
+  let filteredItems = allData.filter(item =>
+    item.Classification2s?.some(
+      classification => 
+        PREFILTER_CATEGORIES.includes(classification.Categoriedeprestations?.ThesLibelle)
+    )
+  );
 
-      filteredItems = sortItems(filteredItems, sortType);
-      
-      contentContainer.innerHTML = '';
-      filteredItems.forEach(item => {
-        contentContainer.appendChild(createCard(item, showDetails));
-      });
+  filteredItems = sortItems(filteredItems, sortType);
+  
+  contentContainer.innerHTML = '';
+  filteredItems.forEach(item => {
+    contentContainer.appendChild(createCard(item, showDetails));
+  });
 
-      updateMarkers(filteredItems);
-    }
+  updateMarkers(filteredItems);
+}
+
 
     function getUserLocation() {
       const sortFilter = document.getElementById('sort-filter');
