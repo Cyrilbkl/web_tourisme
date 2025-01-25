@@ -1,4 +1,4 @@
-al<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -512,7 +512,7 @@ al<!DOCTYPE html>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
  <script>
-    const PREFILTER_CATEGORY = ["Accompagnement", "Séjour"];
+    const PREFILTER_CATEGORY = "Accompagnement";
     const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/e2d1b192-087a-4a9e-b6c9-ae265e537260?format=json';
 
     const icons = {
@@ -969,28 +969,27 @@ al<!DOCTYPE html>
       }
     }
 
-function filterAndDisplayItems() {
-  const contentContainer = document.getElementById('content');
-  const sortFilter = document.getElementById('sort-filter');
-  const sortType = sortFilter.value;
-  
-  let filteredItems = allData.filter(item =>
-    item.Classification2s?.some(
-      classification => 
-        PREFILTER_CATEGORIES.includes(classification.Categoriedeprestations?.ThesLibelle)
-    )
-  );
+    function filterAndDisplayItems() {
+      const contentContainer = document.getElementById('content');
+      const sortFilter = document.getElementById('sort-filter');
+      const sortType = sortFilter.value;
+      
+      let filteredItems = allData.filter(item =>
+        item.Classification2s?.some(
+          classification => 
+            classification.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY
+        )
+      );
 
-  filteredItems = sortItems(filteredItems, sortType);
-  
-  contentContainer.innerHTML = '';
-  filteredItems.forEach(item => {
-    contentContainer.appendChild(createCard(item, showDetails));
-  });
+      filteredItems = sortItems(filteredItems, sortType);
+      
+      contentContainer.innerHTML = '';
+      filteredItems.forEach(item => {
+        contentContainer.appendChild(createCard(item, showDetails));
+      });
 
-  updateMarkers(filteredItems);
-}
-
+      updateMarkers(filteredItems);
+    }
 
     function getUserLocation() {
       const sortFilter = document.getElementById('sort-filter');
