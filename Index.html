@@ -3,68 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue sur mon GitHub</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Explorateur de Fichiers</title>
+    <style>
+        :root {
+            --primary-color: rgb(59, 130, 246);
+            --gray-50: rgb(249, 250, 251);
+            --gray-100: rgb(243, 244, 246);
+            --gray-500: rgb(107, 114, 128);
+            --gray-800: rgb(31, 41, 55);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, var(--gray-50), var(--gray-100));
+        }
+
+        .container {
+            max-width: 64rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            color: var(--gray-800);
+            margin-bottom: 2rem;
+        }
+
+        .files-container {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .file-item {
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--gray-100);
+            transition: background-color 0.15s;
+        }
+
+        .file-item:hover {
+            background-color: var(--gray-50);
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .file-icon {
+            color: var(--gray-500);
+        }
+
+        .folder-icon {
+            color: var(--primary-color);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            color: var(--gray-800);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .file-name:hover {
+            color: var(--primary-color);
+        }
+
+        .file-size {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-top: 0.25rem;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 16rem;
+        }
+
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 2px solid transparent;
+            border-bottom-color: var(--gray-800);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .error {
+            text-align: center;
+            color: #ef4444;
+            padding: 2rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>💻 Bienvenue sur mon GitHub !</h1>
-        <p>Salut ! 👋 Bienvenue sur mon espace GitHub, où je partage mes projets, contributions, et idées créatives. Naviguez librement pour explorer mon travail et en savoir plus sur les technologies que j'utilise.</p>
-    </header>
+    <div class="container">
+        <h1>Explorateur de Fichiers</h1>
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+        <footer>
+            <p>Cliquez sur un fichier pour l'ouvrir</p>
+        </footer>
+    </div>
 
-    <main>
-        <section id="projects">
-            <h2>📂 Index des Projets</h2>
-            <p>Voici une liste de mes principaux projets et dépôts :</p>
+    <script>
+        // Icônes SVG
+        const icons = {
+            file: `<svg xmlns="http://www.w3.org/2000/svg" class="icon file-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+            folder: `<svg xmlns="http://www.w3.org/2000/svg" class="icon folder-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`
+        };
 
-            <h3>1. 🚀 Projets Personnels</h3>
-            <ul>
-                <li><a href="https://github.com/username/projet1">Nom du Projet 1</a> : Description rapide (technologies principales, but).</li>
-                <li><a href="https://github.com/username/projet2">Nom du Projet 2</a> : Description rapide (projet open-source, contributions bienvenues).</li>
-                <li><a href="https://github.com/username/projet3">Nom du Projet 3</a> : Description rapide (ce projet est pour les débutants/intermédiaires).</li>
-            </ul>
+        // Fonction pour créer l'élément de fichier
+        function createFileElement(file) {
+            return `
+                <div class="file-item">
+                    ${file.isDirectory ? icons.folder : icons.file}
+                    <div class="file-info">
+                        <a href="${file.name}" class="file-name">${file.name}</a>
+                        <div class="file-size">${file.size}</div>
+                    </div>
+                </div>
+            `;
+        }
 
-            <h3>2. 🛠️ Outils & Librairies</h3>
-            <ul>
-                <li><a href="https://github.com/username/librairieX">Librairie X</a> : Une bibliothèque utile pour X.</li>
-                <li><a href="https://github.com/username/outilY">Outil Y</a> : Un outil conçu pour améliorer Y.</li>
-            </ul>
+        // Fonction pour scanner le répertoire
+        async function scanDirectory() {
+            try {
+                const response = await fetch('/scan');
+                if (!response.ok) throw new Error('Erreur lors du scan');
+                
+                const files = await response.json();
+                const content = document.getElementById('content');
+                
+                content.innerHTML = `
+                    <div class="files-container">
+                        ${files.map(createFileElement).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                const content = document.getElementById('content');
+                content.innerHTML = `
+                    <div class="error">
+                        <p>Erreur lors du scan du répertoire</p>
+                    </div>
+                `;
+            }
+        }
 
-            <h3>3. 🌐 Projets Web</h3>
-            <ul>
-                <li><a href="https://github.com/username/site-web-dynamique">Site Web Dynamique</a> : Une application web utilisant React/Node.js.</li>
-                <li><a href="https://github.com/username/portfolio">Portfolio</a> : Code source de mon portfolio.</li>
-            </ul>
-        </section>
-
-        <section id="stats">
-            <h2>📊 Statistiques & Contributions</h2>
-            <img src="https://github-readme-stats.vercel.app/api?username=nomdutilisateur&show_icons=true&theme=radical" alt="Statistiques GitHub">
-        </section>
-
-        <section id="links">
-            <h2>🔗 Liens Importants</h2>
-            <ul>
-                <li><a href="https://mon-portfolio.com">Mon Portfolio</a> : Découvrez plus de projets et articles.</li>
-                <li><a href="https://linkedin.com/in/monprofil">Mon LinkedIn</a> : Connectons-nous.</li>
-                <li><a href="https://mon-blog.com">Mon Blog</a> : Articles techniques, tutos, et partages d'expériences.</li>
-            </ul>
-        </section>
-
-        <section id="contact">
-            <h2>📧 Contactez-moi</h2>
-            <p>Vous pouvez me contacter via <a href="mailto:adresseemail@example.com">mon e-mail</a> ou ouvrir une issue sur un projet si vous avez des questions ou suggestions.</p>
-        </section>
-
-        <section id="support">
-            <h2>⭐️ Support</h2>
-            <p>Si vous aimez ce que vous voyez, n'hésitez pas à donner une étoile ⭐ à vos projets préférés ! Cela m'encourage à continuer à développer et partager des idées.</p>
-        </section>
-    </main>
-
-    <footer>
-        <p>Merci de votre visite ! N'oubliez pas de consulter mes dépôts et d'y contribuer si quelque chose vous intéresse !</p>
-        <img src="https://github.com/username/username/raw/main/images/banner.png" alt="Bannière GitHub">
-    </footer>
+        // Lancer le scan au chargement de la page
+        scanDirectory();
+    </script>
 </body>
 </html>
