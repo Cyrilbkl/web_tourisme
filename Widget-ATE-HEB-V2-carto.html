@@ -512,8 +512,8 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
  <script>
-    const PREFILTER_CATEGORY = "Accompagnement";
-    const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/e2d1b192-087a-4a9e-b6c9-ae265e537260?format=json';
+    const PREFILTER_CATEGORY = null;
+    const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/1506faf4-60ee-482f-8cae-442db50e0f40?format=json';
 
     const icons = {
       location: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
@@ -577,14 +577,47 @@
         content.appendChild(location);
       }
 
-      if (item.DescriptifPersonnalise) {
-        const description = document.createElement('p');
-        description.className = 'description';
-        description.textContent = item.DescriptifPersonnalise.length > 150
-          ? item.DescriptifPersonnalise.substring(0, 150) + '...'
-          : item.DescriptifPersonnalise;
-        content.appendChild(description);
-      }
+ // Utiliser AdresseHebergements au lieu de AdresseCompletes
+  if (item.AdresseHebergements?.[0]) {
+    const location = document.createElement('div');
+    location.className = 'info-row';
+    const mapUrl = item.GmapLatitude && item.GmapLongitude 
+      ? `https://www.google.com/maps?q=${item.GmapLatitude},${item.GmapLongitude}`
+      : null;
+    
+    location.innerHTML = mapUrl
+      ? `${icons.location}<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">
+          <span>${item.AdresseHebergements[0].Commune || ''} ${item.AdresseHebergements[0].CodePostal || ''}</span>
+        </a>`
+      : `${icons.location}<span>${item.AdresseHebergements[0].Commune || ''} ${item.AdresseHebergements[0].CodePostal || ''}</span>`;
+    
+    content.appendChild(location);
+  }
+
+if (item.AccueilChevals?.[0]?.Criteresobligatoires?.length) {
+  const tags = document.createElement('div');
+  tags.className = 'tags-container';
+  
+  item.AccueilChevals[0].Criteresobligatoires.forEach(critere => {
+    if (critere.ThesLibelle) {
+      const tagElement = document.createElement('span');
+      tagElement.className = 'tag';
+      tagElement.innerHTML = `${icons.tag} ${critere.ThesLibelle}`;
+      tags.appendChild(tagElement);
+    }
+  });
+
+  content.appendChild(tags);
+}
+
+   if (item.AccueilChevals?.[0]?.Observationsgestiondelaqualif) {
+  const description = document.createElement('p');
+  description.className = 'description';
+  description.textContent = item.AccueilChevals[0].Observationsgestiondelaqualif.length > 150
+    ? item.AccueilChevals[0].Observationsgestiondelaqualif.substring(0, 150) + '...'
+    : item.AccueilChevals[0].Observationsgestiondelaqualif;
+  content.appendChild(description);
+}
 
       item.MoyenDeComs?.forEach(moyen => {
         if (['C1', 'C6'].includes(moyen.TypedaccesTelecom?.ThesCode)) {
@@ -598,47 +631,9 @@
         }
       });
 
-      if (item.Classification2s?.length) {
-        const tags = document.createElement('div');
-        tags.className = 'tags-container';
-        const uniqueTags = new Set();
-        
-        item.Classification2s.forEach(classification => {
-          if (classification.Categoriedeprestations?.ThesLibelle) {
-            uniqueTags.add(classification.Categoriedeprestations.ThesLibelle);
-          }
-        });
-
-        uniqueTags.forEach(tag => {
-          const tagElement = document.createElement('span');
-          tagElement.className = 'tag';
-          tagElement.innerHTML = `${icons.tag} ${tag}`;
-          tags.appendChild(tagElement);
-        });
-
-        if (uniqueTags.size > 0) {
-          content.appendChild(tags);
-        }
-      }
 
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'card-buttons';
-
-      const infoButton = document.createElement('button');
-      infoButton.className = 'secondary-button';
-      infoButton.innerHTML = `
-        <span>Plus d'infos</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-      `;
-      infoButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        showDetails(item);
-      });
-      buttonsContainer.appendChild(infoButton);
 
       const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
       if (url) {
@@ -684,12 +679,12 @@
       title.textContent = item.SyndicObjectName;
       body.appendChild(title);
 
-      if (item.DescriptionCommerciales?.[0]?.Descriptionactiviteequipement) {
-        const description = document.createElement('div');
-        description.className = 'modal-description';
-        description.textContent = item.DescriptionCommerciales[0].Descriptionactiviteequipement;
-        body.appendChild(description);
-      }
+    if (item.AccueilChevals?.[0]?.Observationsgestiondelaqualif) {
+  const description = document.createElement('div');
+  description.className = 'modal-description';
+  description.textContent = item.AccueilChevals[0].Observationsgestiondelaqualif;
+  body.appendChild(description);
+}
 
       const info = document.createElement('div');
       info.className = 'modal-info';
@@ -857,19 +852,7 @@
       const buttons = document.createElement('div');
       buttons.className = 'map-card-buttons';
 
-      const detailsButton = document.createElement('button');
-      detailsButton.className = 'secondary-button';
-      detailsButton.innerHTML = `
-        <span>Plus d'infos</span>
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-      `;
-      detailsButton.addEventListener('click', () => showDetails(item));
-      buttons.appendChild(detailsButton);
-
+    
       const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
       if (url) {
         const websiteButton = document.createElement('a');
@@ -890,19 +873,24 @@
       return marker;
     }
 
-    function initMap() {
-      if (map) return;
+function initMap() {
+  if (map) return;
 
-      map = L.map('map').setView([44.4491, 1.4359], 9);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
-      }).addTo(map);
-    }
+  map = L.map('map').setView([44.4491, 1.4359], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
 
-    function updateMarkers(items) {
+  // Appeler updateMarkers avec toutes les données initiales
+  updateMarkers(allData);
+}
+
+function updateMarkers(items) {
+  // Nettoyer les marqueurs existants
   markers.forEach(marker => marker.remove());
   markers = [];
 
+  // Ajouter les nouveaux marqueurs
   items.forEach(item => {
     const marker = createMapMarker(item, showDetails);
     if (marker) {
@@ -911,15 +899,15 @@
     }
   });
 
+  // Ajuster la vue si nous avons des marqueurs
   if (markers.length > 0) {
     const group = L.featureGroup(markers);
     map.fitBounds(group.getBounds(), { 
       padding: [50, 50],
-      maxZoom: 10 // Limiter le zoom maximum pour une meilleure vue d'ensemble
+      maxZoom: 10
     });
   }
 }
-
 
     function toggleView(view) {
       const contentContainer = document.getElementById('content');
@@ -946,50 +934,101 @@
       }
     }
 
-    function sortItems(items, sortType) {
-      switch (sortType) {
+function getCommune(item) {
+    return item.AdresseHebergements?.[0]?.Commune || 
+           item.AdresseCompletes?.[0]?.Commune || 
+           '';
+}
+
+function sortByCommune(a, b) {
+    const communeA = getCommune(a).toUpperCase();
+    const communeB = getCommune(b).toUpperCase();
+    return communeA.localeCompare(communeB, 'fr');
+}
+
+function updateResults() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedCommune = communeSelect.value;
+    
+    let filteredData = allData.filter(item => {
+        const nameMatch = item.SyndicObjectName.toLowerCase().includes(searchTerm);
+        const communeMatch = selectedCommune === '' || 
+            getCommune(item).toUpperCase() === selectedCommune.toUpperCase();
+        return nameMatch && communeMatch;
+    });
+
+    if (sortSelect.value === 'commune') {
+        filteredData.sort(sortByCommune);
+    } else if (sortSelect.value === 'name') {
+        filteredData.sort((a, b) => a.SyndicObjectName.localeCompare(b.SyndicObjectName, 'fr'));
+    } else if (sortSelect.value === 'distance' && userLocation) {
+        filteredData.sort((a, b) => {
+            const distanceA = getDistance(userLocation, a);
+            const distanceB = getDistance(userLocation, b);
+            return distanceA - distanceB;
+        });
+    }
+
+    displayResults(filteredData);
+}
+
+function populateCommuneSelect() {
+    const communes = new Set();
+    allData.forEach(item => {
+        const commune = getCommune(item);
+        if (commune) {
+            communes.add(commune.toUpperCase());
+        }
+    });
+
+    const sortedCommunes = Array.from(communes).sort((a, b) => 
+        a.localeCompare(b, 'fr')
+    );
+
+    communeSelect.innerHTML = '<option value="">Toutes les communes</option>';
+    sortedCommunes.forEach(commune => {
+        const option = document.createElement('option');
+        option.value = commune;
+        option.textContent = commune;
+        communeSelect.appendChild(option);
+    });
+}
+
+function sortItems(items, sortType) {
+    switch (sortType) {
         case 'distance':
-          return items.sort((a, b) => {
-            const distA = getDistance(userLocation?.latitude, userLocation?.longitude, a.GmapLatitude, a.GmapLongitude);
-            const distB = getDistance(userLocation?.latitude, userLocation?.longitude, b.GmapLatitude, b.GmapLongitude);
-            return distA - distB;
-          });
+            return items.sort((a, b) => {
+                const distA = getDistance(userLocation?.latitude, userLocation?.longitude, a.GmapLatitude, a.GmapLongitude);
+                const distB = getDistance(userLocation?.latitude, userLocation?.longitude, b.GmapLatitude, b.GmapLongitude);
+                return distA - distB;
+            });
         case 'commune':
-          return items.sort((a, b) => {
-            const communeA = a.AdresseCompletes?.[0]?.Commune || '';
-            const communeB = b.AdresseCompletes?.[0]?.Commune || '';
-            return communeA.localeCompare(communeB);
-          });
+            return items.sort(sortByCommune);
         case 'name':
-          return items.sort((a, b) => a.SyndicObjectName.localeCompare(b.SyndicObjectName));
+            return items.sort((a, b) => a.SyndicObjectName.localeCompare(b.SyndicObjectName, 'fr'));
         case 'random':
-          return items.sort(() => Math.random() - 0.5);
+            return items.sort(() => Math.random() - 0.5);
         default:
-          return items;
-      }
+            return items;
     }
+}
 
-    function filterAndDisplayItems() {
-      const contentContainer = document.getElementById('content');
-      const sortFilter = document.getElementById('sort-filter');
-      const sortType = sortFilter.value;
-      
-      let filteredItems = allData.filter(item =>
-        item.Classification2s?.some(
-          classification => 
-            classification.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY
-        )
-      );
 
-      filteredItems = sortItems(filteredItems, sortType);
-      
-      contentContainer.innerHTML = '';
-      filteredItems.forEach(item => {
-        contentContainer.appendChild(createCard(item, showDetails));
-      });
+  function filterAndDisplayItems() {
+  const contentContainer = document.getElementById('content');
+  const sortFilter = document.getElementById('sort-filter');
+  const sortType = sortFilter.value;
+  
+  // Utiliser directement allData au lieu de filtrer
+  let filteredItems = sortItems(allData, sortType);
+  
+  contentContainer.innerHTML = '';
+  filteredItems.forEach(item => {
+    contentContainer.appendChild(createCard(item, showDetails));
+  });
 
-      updateMarkers(filteredItems);
-    }
+  updateMarkers(filteredItems);
+}
 
     function getUserLocation() {
       const sortFilter = document.getElementById('sort-filter');
