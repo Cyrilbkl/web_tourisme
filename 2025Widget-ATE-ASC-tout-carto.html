@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Widget Tourinsoft</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      --primary-color: hsl(33.6deg 12.03% 46.52%);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
+      background: transparent;
+    }
+
+    .widget-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    .fixed-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      z-index: 50;
+    }
+
+    .filter-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-left: auto;
+    }
+
+    .view-button {
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--primary-color);
+      background: white;
+      color: var(--primary-color);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .view-button.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .view-button:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .filter-select {
+      padding: 0.5rem 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      outline: none;
+      transition: all 0.2s;
+      min-width: 200px;
+      background-color: white;
+      color: var(--primary-color);
+    }
+
+    .filter-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(139, 134, 127, 0.2);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+      padding-top: 5rem;
+    }
+
+    .map-view {
+      height: calc(100vh - 5rem);
+      margin-top: 5rem;
+      display: none;
+    }
+
+    .map-view.active {
+      display: block;
+    }
+
+    .card-grid.hidden {
+      display: none;
+    }
+
+    #map {
+      height: 100%;
+      width: 100%;
+      border-radius: 0.75rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: box-shadow 0.3s;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .card-image {
+      aspect-ratio: 16/9;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.75rem;
+    }
+
+    .info-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4b5563;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+
+    .info-row a {
+      color: inherit;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .info-row a:hover {
+      color: var(--primary-color);
+    }
+
+    .description {
+      color: #4b5563;
+      font-size: 0.875rem;
+      margin: 1rem 0;
+      line-height: 1.5;
+    }
+
+    .tags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.75rem;
+      background: #f5f3f1;
+      color: var(--primary-color);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+
+    .card-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: auto;
+    }
+
+    .link-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+
+    .link-button:hover {
+      background: hsl(33.6deg 12.03% 36%);
+    }
+
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: transparent;
+      color: var(--primary-color);
+      border: 1px solid currentColor;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .secondary-button:hover {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 0.75rem;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(20px);
+      transition: transform 0.3s;
+    }
+
+    .modal.active .modal-content {
+      transform: translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #4b5563;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.2s;
+      z-index: 1;
+    }
+
+    .modal-close:hover {
+      background-color: #f3f4f6;
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-image {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 0.75rem 0.75rem 0 0;
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+    }
+
+    .modal-description {
+      color: #4b5563;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.75rem;
+    }
+
+    .price-list {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .price-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+      padding: 0.5rem;
+      background: #f9fafb;
+      border-radius: 0.5rem;
+    }
+
+    .price-type {
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .price-label {
+      color: #4b5563;
+    }
+
+    .price-value {
+      font-weight: 500;
+      color: var(--primary-color);
+    }
+
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px;
+    }
+
+    .spinner {
+      width: 3rem;
+      height: 3rem;
+      border: 2px solid #e5e7eb;
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .leaflet-popup-content-wrapper {
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .leaflet-popup-content {
+      margin: 0;
+      padding: 1rem;
+    }
+
+    .map-card {
+      min-width: 250px;
+    }
+
+    .map-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .map-card-content {
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .map-card-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+/* Cherchez la classe .modal et remplacez-la par : */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Augmenté pour être au-dessus de Leaflet */
+  padding: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+/* Ajoutez ces styles pour le bouton de la carte */
+.map-card .link-button {
+  background: white;
+  color: var(--primary-color);
+  border: 1px solid currentColor;
+}
+
+.map-card .link-button:hover {
+  background: var(--primary-color);
+  color: white;
+}
+  </style>
+</head>
+<body>
+  <div id="tourinsoft-widget" class="widget-container">
+    <div class="fixed-header">
+      <div class="filter-container">
+        <select id="sort-filter" class="filter-select">
+          <option value="commune">Trier par commune</option>
+          <option value="distance">Trier par distance</option>
+          <option value="name">Trier par nom</option>
+          <option value="random">Tri aléatoire</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-button active" data-view="list">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+            Liste
+          </button>
+          <button class="view-button" data-view="map">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            Carte
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="content" class="card-grid"></div>
+    <div id="map-view" class="map-view">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Fermer">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+ <script>
+    const PREFILTER_CATEGORY = null;
+    const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/e2d1b192-087a-4a9e-b6c9-ae265e537260?format=json';
+
+    const icons = {
+      location: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+      phone: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
+      mobile: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12" y2="18"></line></svg>',
+      tag: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>',
+      link: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
+      euro: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"></path><path d="M4 14h9"></path><path d="M19 6a7.7 7.7 0 0 0-5.2-2A7.9 7.9 0 0 0 6 12c0 4.4 3.5 8 7.8 8 2 0 3.8-.8 5.2-2"></path></svg>'
+    };
+
+    let allData = [];
+    let userLocation = null;
+    let map = null;
+    let markers = [];
+
+    function getDistance(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+               Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+               Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function createCard(item, showDetails) {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      if (item.Photoss?.[0]?.Photo?.Url) {
+        const img = document.createElement('img');
+        img.src = item.Photoss[0].Photo.Url;
+        img.alt = item.SyndicObjectName;
+        img.className = 'card-image';
+        card.appendChild(img);
+      }
+
+      const content = document.createElement('div');
+      content.className = 'card-content';
+
+      const title = document.createElement('h3');
+      title.className = 'card-title';
+      title.textContent = item.SyndicObjectName;
+      content.appendChild(title);
+
+      if (item.AdresseCompletes?.[0]) {
+        const location = document.createElement('div');
+        location.className = 'info-row';
+        const mapUrl = item.GmapLatitude && item.GmapLongitude 
+          ? `https://www.google.com/maps?q=${item.GmapLatitude},${item.GmapLongitude}`
+          : null;
+        
+        location.innerHTML = mapUrl
+          ? `${icons.location}<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">
+              <span>${item.AdresseCompletes[0].Commune || ''} ${item.AdresseCompletes[0].CodePostal || ''}</span>
+            </a>`
+          : `${icons.location}<span>${item.AdresseCompletes[0].Commune || ''} ${item.AdresseCompletes[0].CodePostal || ''}</span>`;
+        
+        content.appendChild(location);
+      }
+
+      if (item.DescriptifPersonnalise) {
+        const description = document.createElement('p');
+        description.className = 'description';
+        description.textContent = item.DescriptifPersonnalise.length > 150
+          ? item.DescriptifPersonnalise.substring(0, 150) + '...'
+          : item.DescriptifPersonnalise;
+        content.appendChild(description);
+      }
+
+      item.MoyenDeComs?.forEach(moyen => {
+        if (['C1', 'C6'].includes(moyen.TypedaccesTelecom?.ThesCode)) {
+          const contact = document.createElement('div');
+          contact.className = 'info-row';
+          contact.innerHTML = `
+            ${moyen.TypedaccesTelecom.ThesCode === 'C1' ? icons.phone : icons.mobile}
+            <span>${moyen.CoordonneesTelecom}</span>
+          `;
+          content.appendChild(contact);
+        }
+      });
+
+      if (item.Classification2s?.length) {
+        const tags = document.createElement('div');
+        tags.className = 'tags-container';
+        const uniqueTags = new Set();
+        
+        item.Classification2s.forEach(classification => {
+          if (classification.Categoriedeprestations?.ThesLibelle) {
+            uniqueTags.add(classification.Categoriedeprestations.ThesLibelle);
+          }
+        });
+
+        uniqueTags.forEach(tag => {
+          const tagElement = document.createElement('span');
+          tagElement.className = 'tag';
+          tagElement.innerHTML = `${icons.tag} ${tag}`;
+          tags.appendChild(tagElement);
+        });
+
+        if (uniqueTags.size > 0) {
+          content.appendChild(tags);
+        }
+      }
+
+      const buttonsContainer = document.createElement('div');
+      buttonsContainer.className = 'card-buttons';
+
+      const infoButton = document.createElement('button');
+      infoButton.className = 'secondary-button';
+      infoButton.innerHTML = `
+        <span>Plus d'infos</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      `;
+      infoButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showDetails(item);
+      });
+      buttonsContainer.appendChild(infoButton);
+
+      const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
+      if (url) {
+        const websiteButton = document.createElement('a');
+        websiteButton.href = url;
+        websiteButton.target = '_blank';
+        websiteButton.rel = 'noopener noreferrer';
+        websiteButton.className = 'link-button';
+        websiteButton.innerHTML = `
+          <span>Voir le site</span>
+          ${icons.link}
+        `;
+        websiteButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+        buttonsContainer.appendChild(websiteButton);
+      }
+
+      content.appendChild(buttonsContainer);
+      card.appendChild(content);
+
+      return card;
+    }
+
+    function showDetails(item) {
+      const modal = document.getElementById('modal');
+      const modalContent = document.getElementById('modal-content');
+      const content = document.createElement('div');
+
+      if (item.Photoss?.[0]?.Photo?.Url) {
+        const img = document.createElement('img');
+        img.src = item.Photoss[0].Photo.Url;
+        img.alt = item.SyndicObjectName;
+        img.className = 'modal-image';
+        content.appendChild(img);
+      }
+
+      const body = document.createElement('div');
+      body.className = 'modal-body';
+
+      const title = document.createElement('h2');
+      title.className = 'modal-title';
+      title.textContent = item.SyndicObjectName;
+      body.appendChild(title);
+
+      if (item.DescriptionCommerciales?.[0]?.Descriptionactiviteequipement) {
+        const description = document.createElement('div');
+        description.className = 'modal-description';
+        description.textContent = item.DescriptionCommerciales[0].Descriptionactiviteequipement;
+        body.appendChild(description);
+      }
+
+      const info = document.createElement('div');
+      info.className = 'modal-info';
+
+      if (item.AdresseCompletes?.[0]) {
+        const address = document.createElement('div');
+        address.className = 'info-row';
+        const mapUrl = item.GmapLatitude && item.GmapLongitude 
+          ? `https://www.google.com/maps?q=${item.GmapLatitude},${item.GmapLongitude}`
+          : null;
+        
+        address.innerHTML = mapUrl
+          ? `${icons.location}<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">
+              ${item.AdresseCompletes[0].Adresse1}<br>
+              ${item.AdresseCompletes[0].CodePostal} ${item.AdresseCompletes[0].Commune}
+            </a>`
+          : `${icons.location}
+              ${item.AdresseCompletes[0].Adresse1}<br>
+              ${item.AdresseCompletes[0].CodePostal} ${item.AdresseCompletes[0].Commune}`;
+        
+        info.appendChild(address);
+      }
+
+      item.MoyenDeComs?.forEach(moyen => {
+        if (['C1', 'C6'].includes(moyen.TypedaccesTelecom?.ThesCode)) {
+          const contact = document.createElement('div');
+          contact.className = 'info-row';
+          contact.innerHTML = `
+            ${moyen.TypedaccesTelecom.ThesCode === 'C1' ? icons.phone : icons.mobile}
+            <span>${moyen.CoordonneesTelecom}</span>
+          `;
+          info.appendChild(contact);
+        }
+      });
+
+      body.appendChild(info);
+
+      if (item.Classification2s?.length) {
+        const tags = document.createElement('div');
+        tags.className = 'tags-container';
+        const uniqueTags = new Set();
+        
+        item.Classification2s.forEach(classification => {
+          if (classification.Categoriedeprestations?.ThesLibelle) {
+            uniqueTags.add(classification.Categoriedeprestations.ThesLibelle);
+          }
+        });
+
+        uniqueTags.forEach(tag => {
+          const tagElement = document.createElement('span');
+          tagElement.className = 'tag';
+          tagElement.innerHTML = `${icons.tag} ${tag}`;
+          tags.appendChild(tagElement);
+        });
+
+        if (uniqueTags.size > 0) {
+          body.appendChild(tags);
+        }
+      }
+
+      if (item.Tarifss?.length > 0) {
+        const priceSection = document.createElement('div');
+        priceSection.className = 'modal-section';
+        
+        const priceTitle = document.createElement('h3');
+        priceTitle.className = 'modal-section-title';
+        priceTitle.innerHTML = `${icons.euro} Tarifs`;
+        priceSection.appendChild(priceTitle);
+
+        const priceList = document.createElement('div');
+        priceList.className = 'price-list';
+
+        item.Tarifss.forEach(tarif => {
+          if (tarif.Detailtarif) {
+            const priceItem = document.createElement('div');
+            priceItem.className = 'price-item';
+            
+            const type = document.createElement('span');
+            type.className = 'price-type';
+            type.textContent = tarif.Intituletarifs?.ThesLibelle || "Tarif standard";
+            
+            const label = document.createElement('span');
+            label.className = 'price-label';
+            label.textContent = tarif.Detailtarif;
+            
+            const value = document.createElement('span');
+            value.className = 'price-value';
+            value.textContent = tarif.Minimum ? `${tarif.Minimum}€` : 'Nous consulter';
+            
+            priceItem.appendChild(type);
+            priceItem.appendChild(label);
+            priceItem.appendChild(value);
+            priceList.appendChild(priceItem);
+          }
+        });
+
+        priceSection.appendChild(priceList);
+        body.appendChild(priceSection);
+      }
+
+      const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'link-button';
+        link.innerHTML = `
+          <span>Visiter le site web</span>
+          ${icons.link}
+        `;
+        body.appendChild(link);
+      }
+
+      content.appendChild(body);
+      modalContent.innerHTML = '';
+      modalContent.appendChild(content);
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function initModal() {
+      const modal = document.getElementById('modal');
+      
+      modal.querySelector('.modal-close').addEventListener('click', () => {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      });
+    }
+
+    function createMapMarker(item, showDetails) {
+      if (!item.GmapLatitude || !item.GmapLongitude) return null;
+
+      const marker = L.marker([item.GmapLatitude, item.GmapLongitude]);
+      
+      const popupContent = document.createElement('div');
+      popupContent.className = 'map-card';
+      
+      const title = document.createElement('h3');
+      title.className = 'map-card-title';
+      title.textContent = item.SyndicObjectName;
+      popupContent.appendChild(title);
+
+      if (item.AdresseCompletes?.[0]) {
+        const address = document.createElement('div');
+        address.className = 'map-card-content';
+        address.textContent = `${item.AdresseCompletes[0].Adresse1}, ${item.AdresseCompletes[0].CodePostal} ${item.AdresseCompletes[0].Commune}`;
+        popupContent.appendChild(address);
+      }
+
+      const buttons = document.createElement('div');
+      buttons.className = 'map-card-buttons';
+
+      const detailsButton = document.createElement('button');
+      detailsButton.className = 'secondary-button';
+      detailsButton.innerHTML = `
+        <span>Plus d'infos</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+      `;
+      detailsButton.addEventListener('click', () => showDetails(item));
+      buttons.appendChild(detailsButton);
+
+      const url = item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom;
+      if (url) {
+        const websiteButton = document.createElement('a');
+        websiteButton.href = url;
+        websiteButton.target = '_blank';
+        websiteButton.rel = 'noopener noreferrer';
+        websiteButton.className = 'link-button';
+        websiteButton.innerHTML = `
+          <span>Voir le site</span>
+          ${icons.link}
+        `;
+        buttons.appendChild(websiteButton);
+      }
+
+      popupContent.appendChild(buttons);
+      marker.bindPopup(popupContent);
+
+      return marker;
+    }
+
+    function initMap() {
+      if (map) return;
+
+      map = L.map('map').setView([44.4491, 1.4359], 9);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+    }
+
+    function updateMarkers(items) {
+  markers.forEach(marker => marker.remove());
+  markers = [];
+
+  items.forEach(item => {
+    const marker = createMapMarker(item, showDetails);
+    if (marker) {
+      marker.addTo(map);
+      markers.push(marker);
+    }
+  });
+
+  if (markers.length > 0) {
+    const group = L.featureGroup(markers);
+    map.fitBounds(group.getBounds(), { 
+      padding: [50, 50],
+      maxZoom: 10 // Limiter le zoom maximum pour une meilleure vue d'ensemble
+    });
+  }
+}
+
+
+    function toggleView(view) {
+      const contentContainer = document.getElementById('content');
+      const mapView = document.getElementById('map-view');
+      const listButton = document.querySelector('[data-view="list"]');
+      const mapButton = document.querySelector('[data-view="map"]');
+      
+      if (view === 'map') {
+        contentContainer.classList.add('hidden');
+        mapView.classList.add('active');
+        mapButton.classList.add('active');
+        listButton.classList.remove('active');
+        initMap();
+        setTimeout(() => {
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 100);
+      } else {
+        contentContainer.classList.remove('hidden');
+        mapView.classList.remove('active');
+        listButton.classList.add('active');
+        mapButton.classList.remove('active');
+      }
+    }
+
+    function sortItems(items, sortType) {
+      switch (sortType) {
+        case 'distance':
+          return items.sort((a, b) => {
+            const distA = getDistance(userLocation?.latitude, userLocation?.longitude, a.GmapLatitude, a.GmapLongitude);
+            const distB = getDistance(userLocation?.latitude, userLocation?.longitude, b.GmapLatitude, b.GmapLongitude);
+            return distA - distB;
+          });
+        case 'commune':
+          return items.sort((a, b) => {
+            const communeA = a.AdresseCompletes?.[0]?.Commune || '';
+            const communeB = b.AdresseCompletes?.[0]?.Commune || '';
+            return communeA.localeCompare(communeB);
+          });
+        case 'name':
+          return items.sort((a, b) => a.SyndicObjectName.localeCompare(b.SyndicObjectName));
+        case 'random':
+          return items.sort(() => Math.random() - 0.5);
+        default:
+          return items;
+      }
+    }
+
+    function filterAndDisplayItems() {
+      const contentContainer = document.getElementById('content');
+      const sortFilter = document.getElementById('sort-filter');
+      const sortType = sortFilter.value;
+      
+      let filteredItems = PREFILTER_CATEGORY
+  ? allData.filter(item =>
+      item.Classification2s?.some(
+          classification => 
+              classification.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY
+      )
+    )
+  : allData; // Si PREFILTER_CATEGORY est null, aucun filtrage n'est appliqué
+
+
+      filteredItems = sortItems(filteredItems, sortType);
+      
+      contentContainer.innerHTML = '';
+      filteredItems.forEach(item => {
+        contentContainer.appendChild(createCard(item, showDetails));
+      });
+
+      updateMarkers(filteredItems);
+    }
+
+    function getUserLocation() {
+      const sortFilter = document.getElementById('sort-filter');
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            userLocation = position.coords;
+            if (sortFilter.value === 'distance') {
+              filterAndDisplayItems();
+            }
+          },
+          error => {
+            console.error('Erreur de géolocalisation:', error);
+            sortFilter.querySelector('option[value="distance"]').disabled = true;
+          }
+        );
+      } else {
+        sortFilter.querySelector('option[value="distance"]').disabled = true;
+      }
+    }
+
+    async function init() {
+      const sortFilter = document.getElementById('sort-filter');
+      const contentContainer = document.getElementById('content');
+
+      // Initialiser la carte dès le départ
+      initMap();
+
+      document.querySelectorAll('.view-button').forEach(button => {
+        button.addEventListener('click', () => {
+          const view = button.dataset.view;
+          toggleView(view);
+        });
+      });
+
+      initModal();
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data || !data.value) {
+          throw new Error('Invalid data format');
+        }
+        
+        allData = data.value;
+        
+        if (allData.length === 0) {
+          contentContainer.innerHTML = '<p>Aucune donnée disponible.</p>';
+          return;
+        }
+        
+        // Appeler filterAndDisplayItems avant de configurer les événements
+        filterAndDisplayItems();
+        
+        // Configurer la géolocalisation et les événements après
+        getUserLocation();
+        sortFilter.value = 'commune';
+        sortFilter.addEventListener('change', filterAndDisplayItems);
+        
+      } catch (error) {
+        console.error('Erreur lors du chargement des données:', error);
+        contentContainer.innerHTML = '<p>Les données sont temporairement indisponibles. Veuillez réessayer plus tard.</p>';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
