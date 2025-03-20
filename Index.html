@@ -3,242 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Explorateur de Fichiers</title>
+    <title>Wiki Minimaliste</title>
     <style>
-        :root {
-            --primary-color: rgb(59, 130, 246);
-            --gray-50: rgb(249, 250, 251);
-            --gray-100: rgb(243, 244, 246);
-            --gray-500: rgb(107, 114, 128);
-            --gray-800: rgb(31, 41, 55);
-        }
-
-        * {
+        body {
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            background-color: #f4f4f4;
+            color: #333;
         }
-
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(to bottom right, var(--gray-50), var(--gray-100));
-        }
-
-        .container {
-            max-width: 64rem;
-            margin: 0 auto;
-            padding: 1.5rem;
-        }
-
-        h1 {
-            font-size: 1.875rem;
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
             font-weight: bold;
-            color: var(--gray-800);
-            margin-bottom: 2rem;
         }
-
-        .files-container {
+        .container {
+            width: 80%;
+            margin: 20px auto;
             background: white;
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
-
-        .file-item {
-            padding: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            border-bottom: 1px solid var(--gray-100);
-            transition: background-color 0.15s;
+        nav {
+            text-align: center;
+            margin-bottom: 20px;
         }
-
-        .file-item:hover {
-            background-color: var(--gray-50);
-        }
-
-        .file-item:last-child {
-            border-bottom: none;
-        }
-
-        .icon {
-            width: 1.5rem;
-            height: 1.5rem;
-        }
-
-        .file-icon {
-            color: var(--gray-500);
-        }
-
-        .folder-icon {
-            color: var(--primary-color);
-        }
-
-        .file-info {
-            flex: 1;
-        }
-
-        .file-name {
-            color: var(--gray-800);
+        nav a {
+            margin: 0 15px;
             text-decoration: none;
-            font-weight: 500;
+            color: #3498db;
+            font-weight: bold;
         }
-
-        .file-name:hover {
-            color: var(--primary-color);
+        nav a:hover {
+            text-decoration: underline;
         }
-
-        .file-size {
-            font-size: 0.875rem;
-            color: var(--gray-500);
-            margin-top: 0.25rem;
+        .article-list {
+            list-style: none;
+            padding: 0;
         }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 16rem;
+        .article-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
         }
-
-        .spinner {
-            width: 3rem;
-            height: 3rem;
-            border: 2px solid transparent;
-            border-bottom-color: var(--gray-800);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .article-list li a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-size: 18px;
         }
-
-        .error {
-            text-align: center;
-            color: #ef4444;
-            padding: 2rem;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        footer {
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 0.875rem;
-            color: var(--gray-500);
-        }
-
-        @media (max-width: 640px) {
-            .container {
-                padding: 1rem;
-            }
-
-            h1 {
-                font-size: 1.5rem;
-            }
+        .article-list li a:hover {
+            color: #3498db;
         }
     </style>
 </head>
 <body>
+    <header>Wiki Minimaliste</header>
     <div class="container">
-        <h1>Explorateur de Fichiers</h1>
-        <div id="content">
-            <div class="loading">
-                <div class="spinner"></div>
-            </div>
-        </div>
-        <footer>
-            <p>Cliquez sur un fichier pour l'ouvrir</p>
-        </footer>
+        <nav>
+            <a href="#">Accueil</a>
+            <a href="#">Catégories</a>
+            <a href="#">À propos</a>
+        </nav>
+        <h2>Articles récents</h2>
+        <ul class="article-list">
+            <li><a href="#">Introduction à l'HTML et CSS</a></li>
+            <li><a href="#">Les bases de JavaScript</a></li>
+            <li><a href="#">Accessibilité Web : Bonnes pratiques</a></li>
+            <li><a href="#">Git et GitHub : Guide du débutant</a></li>
+        </ul>
     </div>
-
-    <script>
-        // Icônes SVG
-        const icons = {
-            file: `<svg xmlns="http://www.w3.org/2000/svg" class="icon file-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`,
-            folder: `<svg xmlns="http://www.w3.org/2000/svg" class="icon folder-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>`
-        };
-
-        // Fonction pour formater la taille des fichiers
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
-        // Fonction pour créer l'élément de fichier
-        function createFileElement(file) {
-            return `
-                <div class="file-item">
-                    ${file.isDirectory ? icons.folder : icons.file}
-                    <div class="file-info">
-                        <a href="#" class="file-name" onclick="handleFileClick('${file.name}', ${file.isDirectory}); return false;">
-                            ${file.name}
-                        </a>
-                        <div class="file-size">${file.size}</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // Fonction pour gérer le clic sur un fichier
-        function handleFileClick(name, isDirectory) {
-            if (isDirectory) {
-                // Pour les dossiers, on pourrait implémenter la navigation
-                console.log('Dossier:', name);
-            } else {
-                // Pour les fichiers, on ouvre dans un nouvel onglet
-                window.open(name, '_blank');
-            }
-        }
-
-        // Fonction pour scanner le répertoire
-        async function scanDirectory() {
-            try {
-                const files = [];
-                const entries = await window.showDirectoryPicker();
-                
-                for await (const entry of entries.values()) {
-                    try {
-                        const file = await entry.getFile();
-                        files.push({
-                            name: entry.name,
-                            isDirectory: entry.kind === 'directory',
-                            size: entry.kind === 'file' ? formatBytes(file.size) : '-'
-                        });
-                    } catch (e) {
-                        // Si c'est un dossier, on ne peut pas obtenir getFile()
-                        if (entry.kind === 'directory') {
-                            files.push({
-                                name: entry.name,
-                                isDirectory: true,
-                                size: '-'
-                            });
-                        }
-                    }
-                }
-
-                const content = document.getElementById('content');
-                content.innerHTML = `
-                    <div class="files-container">
-                        ${files.map(createFileElement).join('')}
-                    </div>
-                `;
-            } catch (error) {
-                const content = document.getElementById('content');
-                content.innerHTML = `
-                    <div class="error">
-                        <p>Erreur lors du scan du répertoire</p>
-                        <p>Veuillez autoriser l'accès aux fichiers</p>
-                    </div>
-                `;
-            }
-        }
-
-        // Lancer le scan au chargement de la page
-        scanDirectory();
-    </script>
 </body>
 </html>
