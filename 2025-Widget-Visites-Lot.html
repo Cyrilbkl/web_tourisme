@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Widget Visites – Tourinsoft</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root {
+    --primary-color: #8bb929; /* vert tourisme-lot.com */
+    --secondary-color: #00523b; /* vert foncé */
+  }
+  body { font-family: Arial, sans-serif; }
+  .card-title { color: var(--primary-color); }
+  .link-button { background: var(--primary-color); }
+  .link-button:hover { background: var(--secondary-color); }
+  .secondary-button { color: var(--primary-color); border-color: var(--primary-color); }
+  .secondary-button:hover { background: var(--primary-color); color: #fff; }
+</style>
+</head>
+<body>
+<div id="content" class="card-grid"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/1d197807-9e9a-4037-adfb-72979017ab2b?format=json';
+
+  function createGoogleMapsLink(lat, lon) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+  }
+
+  function createCard(item) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const title = document.createElement('h3');
+    title.className = 'card-title';
+    title.textContent = item.SyndicObjectName || 'Sans titre';
+    card.appendChild(title);
+
+    if (item.AdresseCompletes?.[0]) {
+      const a = item.AdresseCompletes[0];
+      const addr = document.createElement('p');
+      addr.textContent = `${a.Adresse1 || ''}, ${a.CodePostal || ''} ${a.Commune || ''}`;
+      card.appendChild(addr);
+
+      if (item.GmapLatitude && item.GmapLongitude) {
+        const mapLink = document.createElement('a');
+        mapLink.href = createGoogleMapsLink(item.GmapLatitude, item.GmapLongitude);
+        mapLink.target = '_blank';
+        mapLink.textContent = 'S\'y rendre';
+        mapLink.style.display = 'inline-block';
+        mapLink.style.marginTop = '4px';
+        mapLink.style.color = 'var(--secondary-color)';
+        card.appendChild(mapLink);
+      }
+    }
+
+    return card;
+  }
+
+  async function init() {
+    const container = document.getElementById('content');
+    const resp = await fetch(API_URL);
+    const data = await resp.json();
+    data.value.forEach(item => {
+      container.appendChild(createCard(item));
+    });
+  }
+  init();
+</script>
+  <script>
+    // Ajout non intrusif du lien "S'y rendre" sous chaque adresse et dans les popups carte
+    function addDirectionsLinksInCards() {
+      document.querySelectorAll('.card .info-row').forEach(row => {
+        const parent = row.parentElement;
+        if (!parent || parent.querySelector('.directions')) return;
+        const address = row.textContent.trim();
+        if (!address) return;
+        const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+        const div = document.createElement('div');
+        div.className = 'directions';
+        div.innerHTML = `<a href="${url}" target="_blank" rel="noopener noreferrer">S'y rendre</a>`;
+        const descEl = parent.querySelector('.description');
+        if (descEl) parent.insertBefore(div, descEl); else parent.appendChild(div);
+      });
+    }
+    const cardsObserver = new MutationObserver(() => addDirectionsLinksInCards());
+    const contentEl = document.getElementById('content');
+    if (contentEl) { cardsObserver.observe(contentEl, { childList: true, subtree: true }); }
+    window.addEventListener('load', addDirectionsLinksInCards);
+
+    // Sur la carte (ajout de "S'y rendre" si absent)
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof L !== 'undefined' && window.map) {
+        window.map.on('popupopen', (e) => {
+          const popup = e.popup.getElement();
+          if (!popup) return;
+          const container = popup.querySelector('.map-card');
+          if (!container) return;
+          const content = container.querySelector('.map-card-content');
+          const btns = container.querySelector('.map-card-buttons');
+          if (btns && !btns.querySelector('.directions-link') && content) {
+            const url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(content.textContent.trim())}`;
+            const a = document.createElement('a');
+            a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+            a.className = 'secondary-button directions-link';
+            a.textContent = "S'y rendre";
+            btns.appendChild(a);
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
