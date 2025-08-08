@@ -12,330 +12,479 @@
     --bg-muted:#fff7f5;
     --text:#1f2937; --muted:#6b7280; --card:#ffffff; --border:#e5e7eb;
   }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;color:var(--text);background:#f7f7f7}
-  a{color:var(--primary-color)} a:hover{color:var(--primary-color-dark)}
-  .app{max-width:1200px;margin:0 auto;padding:16px}
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .toolbar-left{display:flex;gap:8px;align-items:center}
-  .toolbar-right{display:flex;gap:8px;align-items:center}
-  .btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
-  .btn.active,.btn.primary{background:var(--primary-color);color:#fff;border-color:var(--primary-color)}
-  .btn:hover{filter:brightness(.98)}
-  .input{border:1px solid var(--border);border-radius:10px;padding:8px 12px;min-width:220px}
-  .select{border:1px solid var(--border);border-radius:10px;padding:8px 12px;background:#fff}
-  .stats{font-size:.9rem;color:var(--muted)}
-
-  .layout{display:grid;grid-template-columns:1fr;gap:12px}
-  #map{height:520px;border:1px solid var(--border);border-radius:16px;overflow:hidden}
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-  .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
-  .card img{width:100%;height:180px;object-fit:cover;display:block;background:#eee}
-  .card-body{padding:12px;display:flex;flex-direction:column;gap:8px}
-  .title{font-size:1.05rem;margin:0;color:#111}
-  .commune{color:var(--muted);font-size:.9rem}
-  .desc{color:#374151;font-size:.95rem;line-height:1.45;max-height:3.6em;overflow:hidden}
-  .info-row{font-size:.95rem;color:#374151}
-  .tag{display:inline-flex;align-items:center;gap:.4rem;padding:.25rem .6rem;background:var(--bg-muted);color:var(--primary-color);border-radius:9999px;font-size:.75rem}
-  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-  .link-button{background:var(--primary-color);color:#fff;text-decoration:none;border-radius:10px;padding:8px 12px}
-  .link-button:hover{background:var(--primary-color-dark)}
-  .secondary-button{border:1px solid var(--primary-color);color:var(--primary-color);background:transparent;text-decoration:none;border-radius:10px;padding:8px 12px}
-  .secondary-button:hover{background:var(--primary-color);color:#fff}
-  .directions{margin:-2px 0 4px}
-  .directions a{font-weight:600;text-decoration:none}
-  .directions a:hover{text-decoration:underline}
-
-  /* Modal */
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:5000}
-  .modal.open{display:flex}
-  .modal-card{max-width:900px;width:100%;background:#fff;border-radius:18px;overflow:hidden;display:grid;grid-template-columns:1fr;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .modal-media{height:260px;overflow:hidden}
-  .modal-media img{width:100%;height:100%;object-fit:cover}
-  .modal-content{padding:16px}
-  .modal-title{margin:0 0 4px 0;font-size:1.4rem}
-  .modal-sub{color:var(--muted);margin:0 0 10px 0}
-  .modal-description{color:#4b5563;line-height:1.55;margin-bottom:12px}
-  .modal-grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
-  .close-x{position:absolute;top:10px;right:14px;background:#fff;border:1px solid var(--border);border-radius:999px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer}
-
-  @media (min-width: 1100px){
-    .layout{grid-template-columns:1.2fr 1fr}
-  }
-
-  /* Leaflet popup tune */
-  .leaflet-popup-content-wrapper{border-radius:12px}
-  .map-card{min-width:220px}
-  .map-card-title{margin:0 0 2px 0;color:#111;font-weight:700}
-  .map-card-content{color:#374151;font-size:.95rem}
-  .map-card-buttons{display:flex;gap:6px;margin-top:8px}
-</style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif; background: transparent; }
+    .widget-container { max-width: 1280px; margin: 0 auto; padding: 1rem; }
+    .fixed-header { position: fixed; top: 0; left: 0; right: 0; background: white; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 50; }
+    .filter-container { max-width: 1280px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; }
+    .view-toggle { display: flex; gap: 0.5rem; margin-left: auto; }
+    .view-button { padding: 0.5rem 1rem; border: 1px solid var(--primary-color); background: white; color: var(--primary-color); border-radius: 0.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: all 0.2s; }
+    .view-button.active, .view-button:hover { background: var(--primary-color); color: white; }
+    .filter-select { padding: 0.5rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.5rem; outline: none; transition: all 0.2s; min-width: 200px; background-color: white; color: var(--primary-color); }
+    .filter-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(139, 134, 127, 0.2); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; padding-top: 5rem; }
+    .map-view { height: calc(100vh - 5rem); margin-top: 5rem; display: none; }
+    .map-view.active { display: block; }
+    .card-grid.hidden { display: none; }
+    #map { height: 100%; width: 100%; border-radius: 0.75rem; }
+    .card { background: white; border-radius: 0.75rem; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: box-shadow 0.3s; height: 100%; display: flex; flex-direction: column; cursor: pointer; }
+    .card:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .card-image { aspect-ratio: 16/9; width: 100%; object-fit: cover; }
+    .card-content { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 1.25rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.75rem; }
+    .info-row { display: flex; align-items: center; gap: 0.5rem; color: #4b5563; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    .info-row a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.2s; }
+    .info-row a:hover { color: var(--primary-color); }
+    .description { color: #4b5563; font-size: 0.875rem; margin: 1rem 0; line-height: 1.5; }
+    .tags-container { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+    .tag { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.75rem; background: #f5f3f1; color: var(--primary-color); border-radius: 9999px; font-size: 0.75rem; }
+    .card-buttons { display: flex; gap: 0.5rem; margin-top: auto; }
+    .link-button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--primary-color); color: white; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: background-color 0.2s; border: none; cursor: pointer; }
+    .link-button:hover { background: hsl(33.6deg 12.03% 36%); }
+    .secondary-button { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: transparent; color: var(--primary-color); border: 1px solid currentColor; border-radius: 0.5rem; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+    .secondary-button:hover { background: var(--primary-color); color: white; }
+    .modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+    .modal.active { opacity: 1; visibility: visible; }
+    .modal-content { background: white; border-radius: 0.75rem; max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; transform: translateY(20px); transition: transform 0.3s; }
+    .modal.active .modal-content { transform: translateY(0); }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; color: #4b5563; cursor: pointer; padding: 0.5rem; border-radius: 0.5rem; transition: background-color 0.2s; z-index: 1; }
+    .modal-close:hover { background-color: #f3f4f6; }
+    .modal-body { padding: 2rem; }
+    .modal-image { width: 100%; height: 300px; object-fit: cover; border-radius: 0.75rem 0.75rem 0 0; }
+    .modal-title { font-size: 1.5rem; font-weight: 600; color: var(--primary-color); margin-bottom: 1rem; }
+    .modal-description { color: #4b5563; line-height: 1.6; margin-bottom: 1.5rem; }
+    .modal-info { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .modal-section { margin-bottom: 1.5rem; }
+    .modal-section-title { font-size: 1.1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.75rem; }
+    .price-list { display: grid; gap: 0.5rem; }
+    .price-item { display: grid; grid-template-columns: auto 1fr auto; gap: 1rem; padding: 0.5rem; background: #f9fafb; border-radius: 0.5rem; }
+    .price-type { color: #4b5563; font-weight: 500; }
+    .price-label { color: #4b5563; }
+    .price-value { font-weight: 500; color: var(--primary-color); }
+    .map-card { min-width: 250px; }
+    .map-card-title { font-size: 1rem; font-weight: 600; color: var(--primary-color); margin-bottom: 0.5rem; }
+    .map-card-content { font-size: 0.875rem; color: #4b5563; }
+    .map-card-buttons { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  </style>
 </head>
 <body>
-<div class="app">
-  <div class="toolbar">
-    <div class="toolbar-left">
-      <button class="btn primary" id="btnList">Liste</button>
-      <button class="btn" id="btnMap">Carte</button>
-      <input class="input" id="q" placeholder="Rechercher (nom, commune)…" />
-      <select class="select" id="sort">
-        <option value="name">Tri : Nom A→Z</option>
-        <option value="commune">Tri : Commune A→Z</option>
-        <option value="distance">Tri : Distance</option>
-      </select>
-    </div>
-    <div class="toolbar-right">
-      <span class="stats" id="stats"></span>
-    </div>
-  </div>
-
-  <div class="layout">
-    <div id="listView">
-      <div class="card-grid" id="grid"></div>
-    </div>
-    <div id="mapView" style="display:none">
-      <div id="map"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal détails -->
-<div class="modal" id="modal">
-  <div class="modal-card">
-    <button class="close-x" id="closeModal" aria-label="Fermer">✕</button>
-    <div class="modal-media"><img id="modalImg" alt="" /></div>
-    <div class="modal-content">
-      <h2 class="modal-title" id="modalTitle"></h2>
-      <div class="modal-sub" id="modalSub"></div>
-      <div class="modal-description" id="modalDesc"></div>
-      <div class="directions" id="modalDirections"></div>
-      <div class="modal-grid">
-        <div>
-          <div class="info-row" id="modalAddress"></div>
-          <div class="info-row" id="modalContacts"></div>
-        </div>
-        <div>
-          <div class="info-row" id="modalOpening"></div>
-          <div class="info-row" id="modalTarifs"></div>
+  <div id="tourinsoft-widget" class="widget-container">
+    <div class="fixed-header">
+      <div class="filter-container">
+        <select id="sort-filter" class="filter-select">
+          <option value="commune">Trier par commune</option>
+          <option value="distance">Trier par distance</option>
+          <option value="name">Trier par nom</option>
+          <option value="random">Tri aléatoire</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-button active" data-view="list">Liste</button>
+          <button class="view-button" data-view="map">Carte</button>
         </div>
       </div>
-      <div class="actions" id="modalActions"></div>
+    </div>
+
+    <div id="content" class="card-grid"></div>
+    <div id="map-view" class="map-view"><div id="map"></div></div>
+  </div>
+
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" aria-label="Fermer">✕</button>
+      <div id="modal-content"></div>
     </div>
   </div>
-</div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-  const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/1d197807-9e9a-4037-adfb-72979017ab2b?format=json';
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // ▼▼ Paramètres à adapter ▼▼
+    const API_URL = 'https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/1d197807-9e9a-4037-adfb-72979017ab2b?format=json'; // Flux VISITES
+    const PREFILTER_CATEGORY = null; // si besoin de filtrer par une catégorie de prestation
+    // ▲▲ Paramètres à adapter ▲▲
 
-  const state = { raw: [], items: [], markers: [], map: null, userPos: null, view: 'list' };
+    const icons = {
+      location: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>',
+      phone: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>',
+      mobile: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>',
+      mail: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+      link: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.07 0l3.54-3.54a5 5 0 0 0-7.07-7.07L12 3"></path><path d="M14 11a5 5 0 0 0-7.07 0L3.39 14.54a5 5 0 1 0 7.07 7.07L12 21"></path></svg>',
+      tag: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a4 4 0 0 0 4 4h10"></path><path d="M7 7h10a4 4 0 0 1 4 4v10"></path><line x1="7" y1="7" x2="7" y2="7"></line></svg>',
+      clock: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      euro: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12"/><path d="M4 14h9"/><path d="M7 19a7 7 0 1 1 0-14"/></svg>'
+    };
 
-  // Utils
-  const el = (tag, cls, html) => { const n = document.createElement(tag); if(cls) n.className = cls; if(html!==undefined) n.innerHTML = html; return n; };
-  const text = (s) => (s || '').toString();
-  const clean = (s) => text(s).replace(/<[^>]*>/g,'').trim();
-  const fmtPrice = (min,max) => {
-    if(min!=null && max!=null && min!==max) return `${min.toLocaleString('fr-FR',{minimumFractionDigits:0})}–${max.toLocaleString('fr-FR',{minimumFractionDigits:0})} €`;
-    if(min!=null) return `${min.toLocaleString('fr-FR',{minimumFractionDigits:0})} €`;
-    if(max!=null) return `${max.toLocaleString('fr-FR',{minimumFractionDigits:0})} €`;
-    return '';
-  }
-  const km = (d) => d!=null ? `${d.toFixed(1)} km` : '';
+    let allData = [];
+    let userLocation = null;
+    let map = null;
+    let markers = [];
 
-  function getAddressObj(item){ return item.AdresseCompletes && item.AdresseCompletes[0] || null; }
-  function buildAddressLine(a){
-    if(!a) return '';
-    const parts = [a.Adresse1, a.Adresse1Suite, a.Adresse2, a.Adresse3, a.CodePostal, a.Commune].filter(Boolean);
-    return parts.join(', ').replace(/,\s*,/g, ', ');
-  }
-  function getCommune(item){ return getAddressObj(item)?.Commune || ''; }
-  function getLatLng(item){
-    const lat = parseFloat(item.GmapLatitude || item.GMapsLatitude);
-    const lng = parseFloat(item.GmapLongitude || item.GMapsLongitude);
-    if(Number.isFinite(lat) && Number.isFinite(lng)) return [lat,lng];
-    return null;
-  }
-  function firstPhoto(item){ return item.Photoss?.[0]?.Photo?.Url || ''; }
-  function getWeb(item){ return item.MoyenDeComs?.find(m=>m.TypedaccesTelecom?.ThesCode==='C5')?.CoordonneesTelecom || null; }
-  function getPhone(item){
-    const m = item.MoyenDeComs?.find(m=>m.TypedaccesTelecom?.ThesCode==='C1');
-    return m?.CoordonneesTelecom || null;
-  }
-  function getMail(item){ return item.MoyenDeComs?.find(m=>m.TypedaccesTelecom?.ThesCode==='C4')?.CoordonneesTelecom || null; }
-  function getDesc(item){ return clean(item.DescriptionCommerciale) || ''; }
-  function getTarifs(item){
-    const t = item.Tarifss || [];
-    if(!t.length) return '';
-    const out = t.slice(0,4).map(x=>{
-      const label = x.Intituletarifs?.ThesLibelle || x.IntituleTarifs?.ThesLibelle || '';
-      const s = fmtPrice(x.Minimum ?? x.Minimum1, x.Maximum ?? x.Maximum1);
-      return `${label}${s?': '+s:''}`;
-    });
-    return out.join(' · ');
-  }
-  function getOpening(item){
-    const p = item.PeriodeOuvertures || [];
-    if(!p.length) return '';
-    const f = (s)=> s? s.split('T')[0] : '';
-    const o = p[0];
-    const range = [f(o.Datedebut), f(o.Datefin)].filter(Boolean).join(' → ');
-    const h1 = (o.heuredebut1 && o.heurefin1) ? `${o.heuredebut1.substring(0,5)}–${o.heurefin1.substring(0,5)}`:'';
-    const h2 = (o.heuredebut2 && o.heurefin2) ? `${o.heuredebut2.substring(0,5)}–${o.heurefin2.substring(0,5)}`:'';
-    const hv = [h1,h2].filter(Boolean).join(' / ');
-    return `${range}${hv? ' · '+hv: ''}`;
-  }
-  function buildDirections(latlng, addr){
-    if(latlng){ return `https://www.google.com/maps/dir/?api=1&destination=${latlng[0]},${latlng[1]}`; }
-    if(addr){ return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`; }
-    return null;
-  }
+    function getDistance(lat1, lon1, lat2, lon2) {
+      const toRad = (v) => (v * Math.PI) / 180;
+      if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
 
-  // Distance
-  function haversine(lat1,lon1,lat2,lon2){
-    const toRad = x=>x*Math.PI/180; const R=6371; // km
-    const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
-    const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
-    return 2*R*Math.asin(Math.sqrt(a));
-  }
+    function cleanText(htmlOrText) {
+      if (!htmlOrText) return '';
+      const tmp = document.createElement('div');
+      tmp.innerHTML = htmlOrText;
+      return tmp.textContent.replace(/\s+/g, ' ').trim();
+    }
 
-  // Rendering
-  function card(item){
-    const c = el('div','card');
-    const imgUrl = firstPhoto(item); if(imgUrl){ c.appendChild(el('img','', '')); c.querySelector('img').src=imgUrl; c.querySelector('img').alt=item.SyndicObjectName || ''; }
-    const body = el('div','card-body'); c.appendChild(body);
-    body.appendChild(el('h3','title', text(item.SyndicObjectName)));
-    const commune = getCommune(item); if(commune) body.appendChild(el('div','commune', commune));
-    const addrObj = getAddressObj(item); const addrLine = buildAddressLine(addrObj);
-    if(addrLine) body.appendChild(el('div','info-row', addrLine));
+    function getWebsite(item) {
+      return item.Url || item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C5')?.CoordonneesTelecom || null;
+    }
+    function getPhone(item) {
+      return item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C1')?.CoordonneesTelecom || null;
+    }
+    function getMobile(item) {
+      return item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C6')?.CoordonneesTelecom || null;
+    }
+    function getEmail(item) {
+      return item.MoyenDeComs?.find(m => m.TypedaccesTelecom?.ThesCode === 'C4')?.CoordonneesTelecom || null;
+    }
+    function getDescription(item) {
+      // Compat : certaines syndications ont DescriptionCommerciale (string) et d'autres DescriptionCommerciales[0].Descriptionactiviteequipement
+      return cleanText(item.DescriptionCommerciale || item.Description || item.DescriptionCommerciales?.[0]?.Descriptionactiviteequipement || '');
+    }
 
-    // Directions under address
-    const latlng = getLatLng(item); const dir = buildDirections(latlng, addrLine);
-    if(dir){ const d=el('div','directions'); d.innerHTML = `<a href="${dir}" target="_blank" rel="noopener">S'y rendre</a>`; body.appendChild(d); }
+    function createCard(item, onOpen) {
+      const card = document.createElement('article');
+      card.className = 'card';
 
-    const dsc = getDesc(item); if(dsc) body.appendChild(el('div','desc', dsc));
-    const tarifs = getTarifs(item); if(tarifs) body.appendChild(el('div','info-row', `<span class="tag">Tarifs</span> ${tarifs}`));
-    const opening = getOpening(item); if(opening) body.appendChild(el('div','info-row', `<span class="tag">Ouverture</span> ${opening}`));
+      const imageUrl = item.Photoss?.[0]?.Photo?.Url || '';
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = item.SyndicObjectName || '';
+        img.className = 'card-image';
+        card.appendChild(img);
+      }
 
-    const actions = el('div','actions');
-    const web = getWeb(item); if(web){ const a = el('a','link-button','Visiter le site'); a.href=web; a.target='_blank'; a.rel='noopener'; actions.appendChild(a); }
-    const more = el('a','secondary-button','Voir les détails'); more.href='#'; more.addEventListener('click', (e)=>{ e.preventDefault(); openModal(item);}); actions.appendChild(more);
-    body.appendChild(actions);
+      const content = document.createElement('div');
+      content.className = 'card-content';
 
-    // Distance badge
-    if(state.userPos && latlng){ const d = haversine(state.userPos[0], state.userPos[1], latlng[0], latlng[1]); body.appendChild(el('div','commune', `Distance : ${km(d)}`)); item.__distance = d; }
+      const title = document.createElement('h3');
+      title.className = 'card-title';
+      title.textContent = item.SyndicObjectName || 'Sans titre';
+      content.appendChild(title);
 
-    return c;
-  }
+      if (item.AdresseCompletes?.[0]) {
+        const a = item.AdresseCompletes[0];
+        const address = document.createElement('div');
+        address.className = 'info-row';
+        address.innerHTML = `${icons.location} ${[a.Adresse1, a.CodePostal, a.Commune].filter(Boolean).join(' ')}`;
+        content.appendChild(address);
+      }
 
-  function renderList(){
-    const grid = document.getElementById('grid'); grid.innerHTML='';
-    const q = document.getElementById('q').value.trim().toLowerCase();
-    const filtered = state.items.filter(it=>{
-      const hay = `${text(it.SyndicObjectName)} ${getCommune(it)} ${buildAddressLine(getAddressObj(it))}`.toLowerCase();
-      return !q || hay.includes(q);
-    });
-    const sort = document.getElementById('sort').value;
-    filtered.sort((a,b)=>{
-      if(sort==='commune') return getCommune(a).localeCompare(getCommune(b), 'fr');
-      if(sort==='distance') return (a.__distance ?? 1e9) - (b.__distance ?? 1e9);
-      return text(a.SyndicObjectName).localeCompare(text(b.SyndicObjectName),'fr');
-    });
-    filtered.forEach(it=> grid.appendChild(card(it)) );
-    document.getElementById('stats').textContent = `${filtered.length} résultat${filtered.length>1?'s':''}`;
-  }
+      const desc = getDescription(item);
+      if (desc) {
+        const d = document.createElement('p');
+        d.className = 'description';
+        d.textContent = desc.length > 180 ? desc.slice(0, 177) + '…' : desc;
+        content.appendChild(d);
+      }
 
-  // Map
-  function ensureMap(){ if(state.map) return; state.map = L.map('map');
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ attribution: '&copy; OpenStreetMap' }).addTo(state.map);
-  }
-  function renderMap(){ ensureMap();
-    state.markers.forEach(m=> m.remove()); state.markers=[];
-    const withPos = state.items.map(it=>({it, ll:getLatLng(it)})).filter(x=>x.ll);
-    const group = [];
-    withPos.forEach(({it,ll})=>{
-      const m = L.marker(ll).addTo(state.map);
-      m.bindPopup(mapPopup(it,ll));
-      state.markers.push(m); group.push(ll);
-    });
-    if(group.length){ const b = L.latLngBounds(group); state.map.fitBounds(b, {padding:[20,20]}); }
-  }
-  function mapPopup(item,ll){
-    const addr = buildAddressLine(getAddressObj(item));
-    const dir = buildDirections(ll, addr);
-    const div = document.createElement('div'); div.className='map-card';
-    div.innerHTML = `
-      <div class="map-card-title">${text(item.SyndicObjectName)}</div>
-      <div class="map-card-content">${addr}</div>
-      <div class="map-card-buttons">
-        ${dir?`<a class="secondary-button" href="${dir}" target="_blank" rel="noopener">S'y rendre</a>`:''}
-        ${getWeb(item)?`<a class="link-button" href="${getWeb(item)}" target="_blank" rel="noopener">Site</a>`:''}
-        <a class="secondary-button" href="#" data-open="1">Détails</a>
-      </div>`;
-    div.querySelector('[data-open]')?.addEventListener('click', (e)=>{e.preventDefault(); openModal(item);});
-    return div;
-  }
+      const buttons = document.createElement('div');
+      buttons.className = 'card-buttons';
 
-  // Modal
-  function openModal(item){
-    const m = document.getElementById('modal'); m.classList.add('open');
-    document.getElementById('modalTitle').textContent = text(item.SyndicObjectName);
-    document.getElementById('modalSub').textContent = getCommune(item);
-    document.getElementById('modalDesc').textContent = getDesc(item);
-    const img = firstPhoto(item); document.getElementById('modalImg').src = img || 'https://picsum.photos/1200/600?grayscale';
-    const addr = buildAddressLine(getAddressObj(item));
-    document.getElementById('modalAddress').innerHTML = addr ? `<strong>Adresse</strong><br>${addr}` : '';
-    const ll = getLatLng(item); const url = buildDirections(ll, addr);
-    document.getElementById('modalDirections').innerHTML = url? `<a href="${url}" target="_blank" rel="noopener"><strong>S'y rendre</strong></a>` : '';
+      const infoBtn = document.createElement('button');
+      infoBtn.className = 'secondary-button';
+      infoBtn.innerHTML = "Plus d'infos";
+      infoBtn.addEventListener('click', (e) => { e.stopPropagation(); onOpen(item); });
+      buttons.appendChild(infoBtn);
 
-    const phone = getPhone(item); const mail = getMail(item); const web = getWeb(item);
-    const contacts = [];
-    if(phone) contacts.push(`<div>☎️ <a href="tel:${phone.replace(/\s+/g,'')}">${phone}</a></div>`);
-    if(mail) contacts.push(`<div>✉️ <a href="mailto:${mail}">${mail}</a></div>`);
-    if(web) contacts.push(`<div>🌐 <a href="${web}" target="_blank" rel="noopener">${web.replace(/^https?:\/\//,'')}</a></div>`);
-    document.getElementById('modalContacts').innerHTML = contacts.join('');
+      const site = getWebsite(item);
+      if (site) {
+        const link = document.createElement('a');
+        link.href = site; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.className = 'link-button';
+        link.textContent = 'Voir le site';
+        link.addEventListener('click', (e) => e.stopPropagation());
+        buttons.appendChild(link);
+      }
 
-    const opening = getOpening(item); document.getElementById('modalOpening').innerHTML = opening? `<strong>Ouverture</strong><br>${opening}`: '';
-    const tarifs = getTarifs(item); document.getElementById('modalTarifs').innerHTML = tarifs? `<strong>Tarifs</strong><br>${tarifs}`:'';
+      content.appendChild(buttons);
+      card.appendChild(content);
+      card.addEventListener('click', () => onOpen(item));
+      return card;
+    }
 
-    const actions = document.getElementById('modalActions'); actions.innerHTML='';
-    if(web){ const a = el('a','link-button','Visiter le site'); a.href=web; a.target='_blank'; a.rel='noopener'; actions.appendChild(a); }
-  }
-  document.getElementById('closeModal').addEventListener('click', ()=> document.getElementById('modal').classList.remove('open'));
-  document.getElementById('modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') e.currentTarget.classList.remove('open'); });
+    function renderPrices(container, item) {
+      if (!item.Tarifss || item.Tarifss.length === 0) return;
+      const section = document.createElement('div');
+      section.className = 'modal-section';
+      const title = document.createElement('h3');
+      title.className = 'modal-section-title';
+      title.innerHTML = icons.euro + ' Tarifs';
+      section.appendChild(title);
 
-  // View toggle
-  const btnList = document.getElementById('btnList');
-  const btnMap  = document.getElementById('btnMap');
-  btnList.addEventListener('click', ()=>{state.view='list'; btnList.classList.add('primary'); btnMap.classList.remove('primary'); document.getElementById('listView').style.display='block'; document.getElementById('mapView').style.display='none';});
-  btnMap.addEventListener('click', ()=>{state.view='map'; btnMap.classList.add('primary'); btnList.classList.remove('primary'); document.getElementById('listView').style.display='none'; document.getElementById('mapView').style.display='block'; renderMap();});
+      const list = document.createElement('div');
+      list.className = 'price-list';
+      item.Tarifss.forEach(t => {
+        const hasValue = (t.Minimum != null) || (t.Maximum != null) || (t.Minimum1 != null) || (t.Maximum1 != null) || t.Detailtarif;
+        if (!hasValue) return;
+        const row = document.createElement('div');
+        row.className = 'price-item';
+        const type = document.createElement('span');
+        type.className = 'price-type';
+        type.textContent = t.Intituletarifs?.ThesLibelle || 'Tarif';
+        const label = document.createElement('span');
+        label.className = 'price-label';
+        label.textContent = t.Complementtarif || t.Detailtarif || '';
+        const value = document.createElement('span');
+        value.className = 'price-value';
+        const min = t.Minimum ?? t.Minimum1; const max = t.Maximum ?? t.Maximum1;
+        value.textContent = (min != null && max != null && min !== max) ? `${min}–${max}€` : (min != null ? `${min}€` : (max != null ? `${max}€` : ''));
+        row.appendChild(type); row.appendChild(label); row.appendChild(value);
+        list.appendChild(row);
+      });
+      if (list.children.length) { section.appendChild(list); container.appendChild(section); }
+    }
 
-  // Search / sort
-  document.getElementById('q').addEventListener('input', debounce(renderList, 120));
-  document.getElementById('sort').addEventListener('change', ()=>{ computeDistances().then(renderList); });
+    function renderOpening(container, item) {
+      if (!item.PeriodeOuvertures || item.PeriodeOuvertures.length === 0) return;
+      const section = document.createElement('div');
+      section.className = 'modal-section';
+      const title = document.createElement('h3');
+      title.className = 'modal-section-title';
+      title.innerHTML = icons.clock + ' Périodes d\'ouverture';
+      section.appendChild(title);
+      const list = document.createElement('div');
+      list.style.display = 'grid'; list.style.gap = '0.5rem';
+      item.PeriodeOuvertures.forEach(p => {
+        const line = document.createElement('div');
+        line.style.background = '#f9fafb'; line.style.padding = '0.5rem'; line.style.borderRadius = '0.5rem';
+        const dd = p.Datedebut ? new Date(p.Datedebut).toLocaleDateString('fr-FR') : '';
+        const df = p.Datefin ? new Date(p.Datefin).toLocaleDateString('fr-FR') : '';
+        const h1 = (p.heuredebut1 && p.heurefin1) ? `${p.heuredebut1.slice(0,5)}–${p.heurefin1.slice(0,5)}` : '';
+        const h2 = (p.heuredebut2 && p.heurefin2) ? ` / ${p.heuredebut2.slice(0,5)}–${p.heurefin2.slice(0,5)}` : '';
+        const jours = (p.Jourouverture||[]).map(j=>j.ThesLibelle).join(', ') || '';
+        line.textContent = `${dd} → ${df} • ${jours} ${h1}${h2}`.trim();
+        list.appendChild(line);
+      });
+      section.appendChild(list);
+      container.appendChild(section);
+    }
 
-  function debounce(fn, ms){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); } }
+    function showDetails(item) {
+      const modal = document.getElementById('modal');
+      const modalContent = document.getElementById('modal-content');
+      const content = document.createElement('div');
 
-  async function computeDistances(){
-    if(!navigator.geolocation || document.getElementById('sort').value!=='distance') return;
-    return new Promise(resolve=>{
-      navigator.geolocation.getCurrentPosition(pos=>{
-        state.userPos = [pos.coords.latitude, pos.coords.longitude];
-        state.items.forEach(it=>{ const ll=getLatLng(it); it.__distance = (ll && state.userPos)? haversine(state.userPos[0],state.userPos[1], ll[0], ll[1]) : null; });
-        resolve();
-      }, ()=>resolve());
-    });
-  }
+      if (item.Photoss?.[0]?.Photo?.Url) {
+        const img = document.createElement('img');
+        img.src = item.Photoss[0].Photo.Url;
+        img.alt = item.SyndicObjectName;
+        img.className = 'modal-image';
+        content.appendChild(img);
+      }
 
-  async function load(){
-    const res = await fetch(API_URL);
-    const json = await res.json();
-    state.raw = json.value || [];
-    // Filtrage minimal : on garde les objets avec nom
-    state.items = state.raw.filter(x=>x.SyndicObjectName);
-    await computeDistances();
-    renderList();
-  }
-  load();
-</script>
+      const body = document.createElement('div');
+      body.className = 'modal-body';
+
+      const title = document.createElement('h2');
+      title.className = 'modal-title';
+      title.textContent = item.SyndicObjectName;
+      body.appendChild(title);
+
+      const desc = getDescription(item);
+      if (desc) {
+        const d = document.createElement('div');
+        d.className = 'modal-description';
+        d.textContent = desc;
+        body.appendChild(d);
+      }
+
+      const info = document.createElement('div');
+      info.className = 'modal-info';
+
+      if (item.AdresseCompletes?.[0]) {
+        const a = item.AdresseCompletes[0];
+        const address = document.createElement('div');
+        address.innerHTML = `<strong>Adresse</strong><br>${[a.Adresse1, a.Adresse1Suite, a.Adresse2, a.Adresse3].filter(Boolean).join(' ')}<br>${a.CodePostal || ''} ${a.Commune || ''}`;
+        info.appendChild(address);
+      }
+
+      const phone = getPhone(item), mobile = getMobile(item), email = getEmail(item);
+      if (phone || mobile || email) {
+        const contacts = document.createElement('div');
+        contacts.innerHTML = `<strong>Contacts</strong><br>` +
+          [phone ? `${icons.phone} ${phone}` : '', mobile ? `${icons.mobile} ${mobile}` : '', email ? `${icons.mail} <a href="mailto:${email}">${email}</a>` : '']
+            .filter(Boolean).join('<br>');
+        info.appendChild(contacts);
+      }
+
+      body.appendChild(info);
+      renderPrices(body, item);
+      renderOpening(body, item);
+
+      const site = getWebsite(item);
+      if (site) {
+        const link = document.createElement('a');
+        link.href = site; link.target = '_blank'; link.rel = 'noopener noreferrer';
+        link.className = 'link-button';
+        link.textContent = 'Visiter le site web';
+        body.appendChild(link);
+      }
+
+      content.appendChild(body);
+      modalContent.innerHTML = '';
+      modalContent.appendChild(content);
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function initModal() {
+      const modal = document.getElementById('modal');
+      modal.querySelector('.modal-close').addEventListener('click', () => { modal.classList.remove('active'); document.body.style.overflow = ''; });
+      modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('active')) { modal.classList.remove('active'); document.body.style.overflow = ''; } });
+    }
+
+    function createMapMarker(item, onOpen) {
+      if (!item.GmapLatitude || !item.GmapLongitude) return null;
+      const marker = L.marker([item.GmapLatitude, item.GmapLongitude]);
+      const popupContent = document.createElement('div');
+      popupContent.className = 'map-card';
+      const title = document.createElement('h3');
+      title.className = 'map-card-title';
+      title.textContent = item.SyndicObjectName;
+      popupContent.appendChild(title);
+      if (item.AdresseCompletes?.[0]) {
+        const a = item.AdresseCompletes[0];
+        const address = document.createElement('div');
+        address.className = 'map-card-content';
+        address.textContent = `${a.Adresse1 || ''}, ${a.CodePostal || ''} ${a.Commune || ''}`.trim();
+        popupContent.appendChild(address);
+      }
+      const btns = document.createElement('div');
+      btns.className = 'map-card-buttons';
+      const details = document.createElement('button');
+      details.className = 'secondary-button';
+      details.textContent = "Plus d'infos";
+      details.addEventListener('click', () => onOpen(item));
+      btns.appendChild(details);
+      const site = getWebsite(item);
+      if (site) {
+        const website = document.createElement('a');
+        website.href = site; website.target = '_blank'; website.rel = 'noopener noreferrer';
+        website.className = 'link-button'; website.textContent = 'Voir le site';
+        btns.appendChild(website);
+      }
+      popupContent.appendChild(btns);
+      marker.bindPopup(popupContent);
+      return marker;
+    }
+
+    function initMap() {
+      if (map) return;
+      map = L.map('map').setView([44.4491, 1.4359], 9);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(map);
+    }
+
+    function updateMarkers(items) {
+      markers.forEach(m => m.remove());
+      markers = [];
+      items.forEach(item => { const m = createMapMarker(item, showDetails); if (m) { m.addTo(map); markers.push(m); } });
+      if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 10 });
+      }
+    }
+
+    function toggleView(view) {
+      const contentContainer = document.getElementById('content');
+      const mapView = document.getElementById('map-view');
+      const listButton = document.querySelector('[data-view="list"]');
+      const mapButton = document.querySelector('[data-view="map"]');
+      if (view === 'map') {
+        contentContainer.classList.add('hidden');
+        mapView.classList.add('active');
+        mapButton.classList.add('active');
+        listButton.classList.remove('active');
+        initMap();
+        setTimeout(() => map && map.invalidateSize(), 100);
+      } else {
+        contentContainer.classList.remove('hidden');
+        mapView.classList.remove('active');
+        listButton.classList.add('active');
+        mapButton.classList.remove('active');
+      }
+    }
+
+    function sortItems(items, sortType) {
+      switch (sortType) {
+        case 'distance':
+          return items.slice().sort((a, b) => {
+            const da = getDistance(userLocation?.latitude, userLocation?.longitude, a.GmapLatitude, a.GmapLongitude);
+            const db = getDistance(userLocation?.latitude, userLocation?.longitude, b.GmapLatitude, b.GmapLongitude);
+            return da - db;
+          });
+        case 'commune':
+          return items.slice().sort((a, b) => (a.AdresseCompletes?.[0]?.Commune || '').localeCompare(b.AdresseCompletes?.[0]?.Commune || ''));
+        case 'name':
+          return items.slice().sort((a, b) => (a.SyndicObjectName || '').localeCompare(b.SyndicObjectName || ''));
+        case 'random':
+          return items.slice().sort(() => Math.random() - 0.5);
+        default:
+          return items;
+      }
+    }
+
+    function filterAndDisplayItems() {
+      const contentContainer = document.getElementById('content');
+      const sortFilter = document.getElementById('sort-filter');
+      const sortType = sortFilter.value;
+      let filtered = PREFILTER_CATEGORY
+        ? allData.filter(item => item.Classification2s?.some(c => c.Categoriedeprestations?.ThesLibelle === PREFILTER_CATEGORY))
+        : allData;
+      const items = sortItems(filtered, sortType);
+      contentContainer.innerHTML = '';
+      items.forEach(item => contentContainer.appendChild(createCard(item, showDetails)));
+      initMap();
+      updateMarkers(items);
+    }
+
+    function getUserLocation() {
+      const sortFilter = document.getElementById('sort-filter');
+      if (!navigator.geolocation) { sortFilter.querySelector('option[value="distance"]').disabled = true; return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => { userLocation = pos.coords; if (sortFilter.value === 'distance') filterAndDisplayItems(); },
+        err => { console.warn('Géolocalisation refusée/indispo', err); sortFilter.querySelector('option[value="distance"]').disabled = true; }
+      );
+    }
+
+    async function init() {
+      document.querySelectorAll('.view-button').forEach(btn => btn.addEventListener('click', () => toggleView(btn.dataset.view)));
+      initModal();
+      initMap();
+      const contentContainer = document.getElementById('content');
+      contentContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      try {
+        const response = await fetch(API_URL, { headers: { 'Accept': 'application/json' } });
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (!data || !data.value) throw new Error('Format invalide');
+        allData = data.value;
+        if (allData.length === 0) { contentContainer.innerHTML = '<p>Aucune donnée disponible.</p>'; return; }
+        filterAndDisplayItems();
+        getUserLocation();
+        const sortFilter = document.getElementById('sort-filter');
+        sortFilter.value = 'commune';
+        sortFilter.addEventListener('change', filterAndDisplayItems);
+      } catch (e) {
+        console.error('Erreur chargement données', e);
+        contentContainer.innerHTML = '<p>Les données sont temporairement indisponibles. Veuillez réessayer plus tard.</p>';
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
