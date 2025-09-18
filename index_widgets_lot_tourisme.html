@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <!-- Titre mis à jour conformément à la demande de l'utilisateur :
+         "Widgets intégrables - Lot Tourisme" -->
+    <title>Widgets intégrables - Lot Tourisme</title>
+    <style>
+        /*
+         * Cette variante reprend l’esthétique des widgets « Visites » du site Lot Tourisme : des
+         * couleurs chaleureuses inspirées des boutons et titres (marron doux et beige)
+         *【911701223277472†screenshot】, mais appliquées sur un fond sombre pour un contraste moderne.
+         */
+        :root {
+            /*
+             * Nouvelle palette inspirée du moodboard fourni : un mélange de bleus profonds,
+             * de bruns chaleureux et de tons clairs. Le fond est un bleu nuit afin
+             * d’assurer un contraste marqué avec les cartes lumineuses et les boutons.
+             */
+            --bg-color: #0b2545;       /* Bleu nuit pour le fond général */
+            --card-bg: #f5f4f2;       /* Fond clair et chaud pour les cartes */
+            --primary-color: #1e4870; /* Bleu moyen pour titres et boutons principaux */
+            --primary-hover: #15385a; /* Bleu plus sombre au survol */
+            --secondary-color: #B8B0AE;/* Remplace la couleur brun par un beige doux (demande utilisateur) */
+            --secondary-hover: #9f9795;/* Variante légèrement plus sombre pour l’effet hover */
+            --text-dark: #f0f0f0;     /* Texte très clair sur fond sombre */
+            --text-muted: #c7c7c7;    /* Texte atténué */
+            --border-color: #2c4d70;  /* Bordure discrète tirant vers le bleu */
+        }
+        body {
+            margin: 0;
+            padding: 2rem;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            /* Le titre doit être bien contrasté par rapport au fond sombre : on utilise la couleur secondaire (brun) au lieu du bleu */
+            color: var(--secondary-color);
+        }
+        .intro {
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+            max-width: 900px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.6rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: var(--secondary-hover);
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+        .buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            line-height: 1;
+        }
+        .button.view {
+            background-color: var(--primary-color);
+            color: #ffffff;
+        }
+        .button.view:hover { background-color: var(--primary-hover); }
+        .button.copy {
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            border: none;
+        }
+        .button.copy:hover { background-color: var(--secondary-hover); }
+        .button svg {
+            width: 16px;
+            height: 16px;
+        }
+        .code-container {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        textarea {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px;
+            background-color: #ece7e0;
+            color: #4b362b;
+            font-family: monospace;
+            font-size: 0.8rem;
+            resize: none;
+        }
+    </style>
+    <script>
+        function copyCode(id) {
+            const textarea = document.getElementById(id);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const btn = document.getElementById('btn-' + id);
+                const original = btn.innerHTML;
+                btn.innerHTML = 'Copié !';
+                setTimeout(() => { btn.innerHTML = original; }, 1500);
+            }).catch(err => console.error('Copie impossible', err));
+        }
+    </script>
+</head>
+<body>
+    <!-- Titre et description mis à jour selon les indications de l'utilisateur -->
+    <h1>Widgets intégrables - Lot Tourisme</h1>
+    <p class="intro">Voici les widgets dynamiques de présentation des offres touristiques du Lot. Les contenus sont enrichis en temps réel et sont issus du Système d'information touristique du Lot.</p>
+    <div class="cards">
+
+        <!-- Carte pour 2025-Widget-Visites-Lot.html -->
+        <div class="card">
+            <h2>2025-Widget-Visites-Lot.html</h2>
+            <p>Liste des visites et sorties dans le Lot pour l'année 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025-Widget-Visites-Lot.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code0" class="button copy" onclick="copyCode('code0')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code0" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025-Widget-Visites-Lot.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025-Widget-Visites.html -->
+        <div class="card">
+            <h2>2025-Widget-Visites.html</h2>
+            <p>Widget de présentation des activités de visites en 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025-Widget-Visites.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code1" class="button copy" onclick="copyCode('code1')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code1" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025-Widget-Visites.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025Widget-ATE-ASC-Anes.html -->
+        <div class="card">
+            <h2>2025Widget-ATE-ASC-Anes.html</h2>
+            <p>Activités ATE ASC – Balades en ânes pour 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Anes.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code2" class="button copy" onclick="copyCode('code2')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code2" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Anes.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025Widget-ATE-ASC-Balades.html -->
+        <div class="card">
+            <h2>2025Widget-ATE-ASC-Balades.html</h2>
+            <p>Activités ATE ASC – Balades pédestres pour 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Balades.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code3" class="button copy" onclick="copyCode('code3')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code3" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Balades.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025Widget-ATE-ASC-Sejours.html -->
+        <div class="card">
+            <h2>2025Widget-ATE-ASC-Sejours.html</h2>
+            <p>Activités ATE ASC – Séjours et randonnées pour 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Sejours.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code4" class="button copy" onclick="copyCode('code4')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code4" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-Sejours.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025Widget-ATE-ASC-tout-carto.html -->
+        <div class="card">
+            <h2>2025Widget-ATE-ASC-tout-carto.html</h2>
+            <p>Vue cartographique complète des activités ATE ASC 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-tout-carto.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code5" class="button copy" onclick="copyCode('code5')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code5" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-ASC-tout-carto.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour 2025Widget-ATE-HEB-V2-carto.html -->
+        <div class="card">
+            <h2>2025Widget-ATE-HEB-V2-carto.html</h2>
+            <p>Hébergements ATE – version 2 cartographique 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-HEB-V2-carto.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code6" class="button copy" onclick="copyCode('code6')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code6" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/2025Widget-ATE-HEB-V2-carto.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Index.html -->
+        <div class="card">
+            <h2>Index.html</h2>
+            <p>Page d’index des widgets 2025.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Index.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code7" class="button copy" onclick="copyCode('code7')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code7" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Index.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Widget-ATE-ASC-V2-Promenade.html -->
+        <div class="card">
+            <h2>Widget-ATE-ASC-V2-Promenade.html</h2>
+            <p>Promenades ATE ASC – version 2 (randonnées).</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Promenade.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code8" class="button copy" onclick="copyCode('code8')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code8" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Promenade.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Widget-ATE-ASC-V2-Sej-carto.html -->
+        <div class="card">
+            <h2>Widget-ATE-ASC-V2-Sej-carto.html</h2>
+            <p>Carte interactive pour les séjours ATE ASC V2.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Sej-carto.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code9" class="button copy" onclick="copyCode('code9')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code9" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Sej-carto.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Widget-ATE-ASC-V2-Sejours-randos.html -->
+        <div class="card">
+            <h2>Widget-ATE-ASC-V2-Sejours-randos.html</h2>
+            <p>Randonnées et séjours – version 2 ATE ASC.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Sejours-randos.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code10" class="button copy" onclick="copyCode('code10')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code10" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-ASC-V2-Sejours-randos.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Widget-ATE-HEB-V2-carto.html -->
+        <div class="card">
+            <h2>Widget-ATE-HEB-V2-carto.html</h2>
+            <p>Hébergements ATE – V2 avec carte interactive.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-HEB-V2-carto.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code11" class="button copy" onclick="copyCode('code11')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code11" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-HEB-V2-carto.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour Widget-ATE-Hebergements.html -->
+        <div class="card">
+            <h2>Widget-ATE-Hebergements.html</h2>
+            <p>Liste des hébergements ATE dans le Lot.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-Hebergements.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code12" class="button copy" onclick="copyCode('code12')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code12" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/Widget-ATE-Hebergements.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour widget flux type optimise.html -->
+        <div class="card">
+            <h2>widget flux type optimise.html</h2>
+            <p>Widget flux optimisé pour des performances accrues.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/widget%20flux%20type%20optimise.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code13" class="button copy" onclick="copyCode('code13')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code13" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/widget%20flux%20type%20optimise.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+        <!-- Carte pour widget2024.html -->
+        <div class="card">
+            <h2>widget2024.html</h2>
+            <p>Version 2024 du widget générique.</p>
+            <div class="buttons">
+                <a href="https://cyrilbkl.github.io/web_tourisme/widget2024.html" target="_blank" class="button view" title="Voir le widget">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                    Voir
+                </a>
+                <button id="btn-code14" class="button copy" onclick="copyCode('code14')" title="Copier le code">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copier
+                </button>
+            </div>
+            <div class="code-container">
+                <textarea id="code14" readonly><iframe src="https://cyrilbkl.github.io/web_tourisme/widget2024.html" width="800" height="600" frameborder="0"></iframe></textarea>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
