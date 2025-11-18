@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Revue de presse - Lot Tourisme</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --lot-primary: #007b8a;
+      --lot-primary-light: #e6f3f5;
+      --lot-text: #222;
+      --lot-muted: #666;
+      --lot-border: #e4e4e4;
+      --lot-background: #ffffff;
+      --lot-radius-xl: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, sans-serif;
+      background: var(--lot-background);
+      color: var(--lot-text);
+    }
+
+    .lot-press-widget {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 40px;
+    }
+
+    .lot-press-header {
+      text-align: left;
+      margin-bottom: 28px;
+    }
+
+    .lot-press-eyebrow {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--lot-primary);
+      margin-bottom: 6px;
+    }
+
+    .lot-press-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .lot-press-subtitle {
+      font-size: 0.95rem;
+      color: var(--lot-muted);
+      line-height: 1.5;
+    }
+
+    .lot-press-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 16px;
+    }
+
+    .lot-press-item {
+      display: flex;
+      gap: 18px;
+      padding: 14px 0;
+      border-top: 1px solid var(--lot-border);
+    }
+
+    .lot-press-item:first-child {
+      border-top: none;
+      padding-top: 0;
+    }
+
+    .lot-press-thumbnail {
+      flex: 0 0 140px;
+      max-width: 140px;
+      aspect-ratio: 4 / 3;
+      border-radius: 12px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #004c56, #00a6b5);
+      position: relative;
+    }
+
+    .lot-press-thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .lot-press-thumbnail-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #e9f7f8;
+      font-size: 0.8rem;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .lot-press-content {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .lot-press-meta-top {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--lot-muted);
+      margin-bottom: 2px;
+    }
+
+    .lot-press-article-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+      color: var(--lot-text);
+    }
+
+    .lot-press-article-title a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .lot-press-article-title a:hover,
+    .lot-press-article-title a:focus {
+      color: var(--lot-primary);
+      text-decoration: underline;
+    }
+
+    .lot-press-summary {
+      font-size: 0.9rem;
+      color: var(--lot-muted);
+      line-height: 1.45;
+      margin-bottom: 4px;
+    }
+
+    .lot-press-links {
+      display: flex;
+      gap: 12px;
+      font-size: 0.8rem;
+      margin-top: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .lot-press-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: var(--lot-primary-light);
+      color: var(--lot-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+    }
+
+    .lot-press-link {
+      text-decoration: none;
+      color: var(--lot-primary);
+      font-weight: 500;
+    }
+
+    .lot-press-link::before {
+      content: "⟶ ";
+      font-size: 0.85em;
+    }
+
+    .lot-press-link:hover,
+    .lot-press-link:focus {
+      text-decoration: underline;
+    }
+
+    .lot-press-footer {
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--lot-border);
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .lot-press-footer a {
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--lot-primary);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 123, 138, 0.3);
+      background: #f8fbfb;
+    }
+
+    .lot-press-footer a:hover,
+    .lot-press-footer a:focus {
+      background: var(--lot-primary);
+      color: #ffffff;
+    }
+
+    .lot-press-state {
+      font-size: 0.9rem;
+      color: var(--lot-muted);
+      padding: 16px 0 8px;
+    }
+
+    @media (max-width: 720px) {
+      .lot-press-widget {
+        padding-inline: 16px;
+      }
+      .lot-press-item {
+        flex-direction: column;
+      }
+      .lot-press-thumbnail {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="lot-press-widget" id="lot-press-widget">
+    <header class="lot-press-header">
+      <div class="lot-press-eyebrow">Revue de presse</div>
+      <h2 class="lot-press-title">Les derniers articles parus</h2>
+      <p class="lot-press-subtitle">
+        Une sélection d’articles, reportages et billets parus sur le Lot en France
+        et à l’international.
+      </p>
+    </header>
+
+    <div id="lot-press-state" class="lot-press-state">
+      Chargement des derniers articles…
+    </div>
+    <div id="lot-press-list" class="lot-press-list" aria-live="polite"></div>
+
+    <footer class="lot-press-footer">
+      <!-- Modifie cette URL pour pointer vers ta page complète de revue de presse -->
+      <a href="https://www.tourisme-lot.com/espace-presse/revue-de-presse" target="_blank" rel="noopener">
+        Voir toute la revue de presse
+      </a>
+    </footer>
+  </div>
+
+  <script>
+    // ========= CONFIGURATION DE BASE =========
+    const API_URL =
+      "https://api-v3.tourinsoft.com/api/syndications/cdt46.tourinsoft.com/834275f6-2202-438b-97dc-655698f3f7b6?format=json";
+    const MAX_ITEMS = 10;
+
+    // === MAPPING DES CHAMPS ===
+    // Adapte ces clés en fonction des noms exacts présents dans ton flux.
+    // Tu peux vérifier la structure via un appel direct à l’URL JSON dans un navigateur.
+    const FIELD_MAP = {
+      title: ["Titre", "TITLE", "Nom", "Name"], // champs possibles pour le titre
+      summary: ["Chapeau", "Resume", "Descriptif_court", "Description"], // résumé
+      date: ["Published", "Date", "DATE_ARTICLE"], // champ date
+      image: ["Illustration.Url", "Photo.Url", "Image", "Vignette"], // URL image
+      url: [
+        "Url",
+        "Lien",
+        "TIS_URL_OFFRE",
+        "TIS_URL_DETAIL"
+      ], // lien vers l’article source
+      source: ["Media", "Source", "Support"] // nom du média support
+    };
+
+    // ========= FONCTIONS UTILITAIRES =========
+
+    // Récupérer la première valeur non vide parmi plusieurs chemins potentiels
+    function getField(obj, paths) {
+      if (!obj || !paths) return null;
+      const pathArray = Array.isArray(paths) ? paths : [paths];
+
+      for (const path of pathArray) {
+        const segments = path.split(".");
+        let current = obj;
+        let ok = true;
+        for (const segment of segments) {
+          if (current && Object.prototype.hasOwnProperty.call(current, segment)) {
+            current = current[segment];
+          } else {
+            ok = false;
+            break;
+          }
+        }
+        if (ok && current != null && String(current).trim() !== "") {
+          return current;
+        }
+      }
+      return null;
+    }
+
+    function parseDate(raw) {
+      if (!raw) return null;
+      const d = new Date(raw);
+      return isNaN(d.getTime()) ? null : d;
+    }
+
+    function formatDateFr(date) {
+      if (!date) return "";
+      return date.toLocaleDateString("fr-FR", {
+        year: "numeric",
+        month: "long",
+        day: "2-digit"
+      });
+    }
+
+    // ========= CONSTRUCTION DU WIDGET =========
+
+    async function loadPressArticles() {
+      const listEl = document.getElementById("lot-press-list");
+      const stateEl = document.getElementById("lot-press-state");
+
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error("Erreur HTTP " + response.status);
+        }
+
+        const data = await response.json();
+
+        // Beaucoup de syndications Tourinsoft renvoient { value: [...] }
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data.value)
+          ? data.value
+          : [];
+
+        if (!items.length) {
+          stateEl.textContent =
+            "Aucun article de presse n’est disponible pour le moment.";
+          return;
+        }
+
+        // Tri par date décroissante (Published puis Updated à défaut)
+        const enriched = items
+          .map((item) => {
+            const dRaw =
+              getField(item, FIELD_MAP.date) ||
+              item.Updated ||
+              item.Published;
+            const d = parseDate(dRaw);
+            return { raw: item, date: d };
+          })
+          .sort((a, b) => {
+            if (!a.date && !b.date) return 0;
+            if (!a.date) return 1;
+            if (!b.date) return -1;
+            return b.date - a.date;
+          })
+          .slice(0, MAX_ITEMS);
+
+        listEl.innerHTML = "";
+        stateEl.textContent = "";
+
+        enriched.forEach(({ raw, date }) => {
+          const title =
+            getField(raw, FIELD_MAP.title) || "Article sans titre";
+          const summary =
+            getField(raw, FIELD_MAP.summary) ||
+            "Consultez l’article complet pour en savoir plus.";
+          const imgUrl = getField(raw, FIELD_MAP.image);
+          const url = getField(raw, FIELD_MAP.url) || "#";
+          const source = getField(raw, FIELD_MAP.source);
+
+          const articleEl = document.createElement("article");
+          articleEl.className = "lot-press-item";
+
+          // Bloc image
+          const thumbEl = document.createElement("div");
+          thumbEl.className = "lot-press-thumbnail";
+
+          if (imgUrl) {
+            const img = document.createElement("img");
+            img.src = imgUrl;
+            img.alt = "";
+            thumbEl.appendChild(img);
+          } else {
+            const fallback = document.createElement("div");
+            fallback.className = "lot-press-thumbnail-fallback";
+            fallback.textContent = "Revue de presse Lot Tourisme";
+            thumbEl.appendChild(fallback);
+          }
+
+          // Bloc contenu
+          const contentEl = document.createElement("div");
+          contentEl.className = "lot-press-content";
+
+          const metaTop = document.createElement("div");
+          metaTop.className = "lot-press-meta-top";
+          const parts = [];
+          if (source) parts.push(source);
+          if (date) parts.push(formatDateFr(date));
+          metaTop.textContent = parts.join(" • ");
+
+          const titleEl = document.createElement("h3");
+          titleEl.className = "lot-press-article-title";
+          if (url && url !== "#") {
+            const link = document.createElement("a");
+            link.href = url;
+            link.target = "_blank";
+            link.rel = "noopener";
+            link.textContent = title;
+            titleEl.appendChild(link);
+          } else {
+            titleEl.textContent = title;
+          }
+
+          const summaryEl = document.createElement("p");
+          summaryEl.className = "lot-press-summary";
+          summaryEl.textContent = summary;
+
+          const linksEl = document.createElement("div");
+          linksEl.className = "lot-press-links";
+
+          const typePill = document.createElement("span");
+          typePill.className = "lot-press-pill";
+          typePill.textContent = "Article de presse";
+
+          linksEl.appendChild(typePill);
+
+          if (url && url !== "#") {
+            const seeLink = document.createElement("a");
+            seeLink.className = "lot-press-link";
+            seeLink.href = url;
+            seeLink.target = "_blank";
+            seeLink.rel = "noopener";
+            seeLink.textContent = "Lire l’article";
+            linksEl.appendChild(seeLink);
+          }
+
+          contentEl.appendChild(metaTop);
+          contentEl.appendChild(titleEl);
+          contentEl.appendChild(summaryEl);
+          contentEl.appendChild(linksEl);
+
+          articleEl.appendChild(thumbEl);
+          articleEl.appendChild(contentEl);
+
+          listEl.appendChild(articleEl);
+        });
+      } catch (error) {
+        console.error("Erreur lors du chargement de la revue de presse :", error);
+        stateEl.textContent =
+          "Une erreur est survenue lors du chargement des articles de presse.";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadPressArticles);
+  </script>
+</body>
+</html>
